@@ -62,6 +62,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
         currLatitude = preferences.getString(CommonString.KEY_LATITUDE, "0.0");
         currLongitude = preferences
                 .getString(CommonString.KEY_LONGITUDE, "0.0");
+        Boolean fromStore = getIntent().getBooleanExtra(CommonString.KEY_FROMSTORE,false);
 
         db = new Database(this);
         db.open();
@@ -69,7 +70,16 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
         coverageBean = db.getCoverageSpecificData(store_id);
         store_intime = coverageBean.getInTime();
         store_outtime = getCurrentTime();
-        new BackgroundTask(this).execute();
+
+        if(fromStore)
+        {
+            new BackgroundTask(this).execute();
+        }
+        else
+        {
+            new BackgroundTaskForAttendence(this).execute();
+        }
+
     }
 
     @Override
@@ -278,23 +288,189 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
             if (result.equals(CommonString.KEY_SUCCESS)) {
 
                 AlertAndMessages.showAlertMessage(CheckoutActivity.this,"Successfully Checked out");
-
                 finish();
-
             } else if (!result.equals("")) {
                 AlertAndMessages.showToastMessage(CheckoutActivity.this,"Network Error Try Again");
                 finish();
-
             }
 
         }
 
     }
 
+
+    private class BackgroundTaskForAttendence extends AsyncTask<Void, Data, String> {
+        private Context context;
+
+        BackgroundTaskForAttendence(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+            super.onPreExecute();
+
+            dialog = new Dialog(context);
+            dialog.setContentView(R.layout.custom);
+            dialog.setTitle("Sending Attendance Data");
+            dialog.setCancelable(false);
+            dialog.show();
+            pb = (ProgressBar) dialog.findViewById(R.id.progressBar1);
+            percentage = (TextView) dialog.findViewById(R.id.percentage);
+            message = (TextView) dialog.findViewById(R.id.message);
+
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        protected String doInBackground(Void... params) {
+            // TODO Auto-generated method stub
+
+            try {
+
+                //String result = "";
+                data = new Data();
+
+                data.value = 20;
+                data.name = "Attendance Data Uploading";
+                publishProgress(data);
+
+
+                String onXML = "[ATTENDANCE_DATA]"
+                        + "[USER_NAME]" + username + "[/USER_NAME]"
+                        + "[REASON_CD]" + store_id + "[/REASON_CD]"
+                        + "[VISIT_DATE]" + visit_date + "[/VISIT_DATE]"
+                        + "[/ATTENDANCE_DATA]";
+
+                final String sos_xml = "[DATA]" + onXML
+                        + "[/DATA]";
+
+                SoapObject request = new SoapObject(
+                        CommonString.NAMESPACE, CommonString.METHOD_UPLOAD_XML);
+                request.addProperty("XMLDATA", sos_xml);
+                request.addProperty("KEYS", "ATTENDANCE_DATA");
+                request.addProperty("USERNAME", username);
+                SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
+                        SoapEnvelope.VER11);
+                envelope.dotNet = true;
+                envelope.setOutputSoapObject(request);
+
+                HttpTransportSE androidHttpTransport = new HttpTransportSE(
+                        CommonString.URL);
+
+                androidHttpTransport.call(
+                        CommonString.SOAP_ACTION+CommonString.METHOD_UPLOAD_XML,
+                        envelope);
+                Object result = (Object) envelope.getResponse();
+
+
+                if (result.toString().equalsIgnoreCase(
+                        CommonString.KEY_NO_DATA)) {
+                    return "Upload_Attendance_Status";
+                }
+
+                if (result.toString().equalsIgnoreCase(
+                        CommonString.KEY_FAILURE)) {
+                    return "Upload_Attendance_Status";
+                }
+
+                // for failure
+
+
+
+                data.value = 100;
+                data.name = "Attendance Done";
+                publishProgress(data);
+
+                if (result.toString()
+                        .equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                    db.updateAttendanceStatus(username, visit_date, CommonString.KEY_U);
+                } else {
+                    if (result.toString().equalsIgnoreCase(
+                            CommonString.KEY_FALSE)) {
+                        return CommonString.KEY_Upload_Store_ChecOut_Status;
+                    }
+
+                    // for failure
+
+                }
+                return CommonString.KEY_SUCCESS;
+
+            } catch (MalformedURLException e) {
+
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        // TODO Auto-generated method stub
+
+                        AlertAndMessages.showAlertMessage(CheckoutActivity.this,AlertAndMessages.MESSAGE_EXCEPTION);
+                    }
+                });
+
+            } catch (IOException e) {
+                // counter++;
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        AlertAndMessages.showAlertMessage(CheckoutActivity.this,AlertAndMessages.MESSAGE_SOCKETEXCEPTION);
+                        // TODO Auto-generated method stub
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        // TODO Auto-generated method stub
+                        AlertAndMessages.showAlertMessage(CheckoutActivity.this,AlertAndMessages.MESSAGE_EXCEPTION);
+                    }
+                });
+            }
+
+            return "";
+        }
+
+        @Override
+        protected void onProgressUpdate(Data... values) {
+            // TODO Auto-generated method stub
+
+            pb.setProgress(values[0].value);
+            percentage.setText(values[0].value + "%");
+            message.setText(values[0].name);
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            // TODO Auto-generated method stub
+            super.onPostExecute(result);
+
+            dialog.dismiss();
+
+            if (result.equals(CommonString.KEY_SUCCESS)) {
+                AlertAndMessages.showToastMessage(CheckoutActivity.this,"Successfully Attendance marked");
+                finish();
+            } else if (!result.equals("")) {
+                AlertAndMessages.showToastMessage(CheckoutActivity.this,"Network Error Try Again");
+                finish();
+            }
+
+        }
+
+    }
+
+
     class Data {
         int value;
         String name;
     }
+
+
+
 
 
     public String getCurrentTime() {

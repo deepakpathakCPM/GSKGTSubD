@@ -8,6 +8,7 @@ import com.example.deepakp.gskgtsubd.gettersetter.CityMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.FailureGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.JCPMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.LoginGetterSetter;
+import com.example.deepakp.gskgtsubd.gettersetter.MappingUsrGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.MappingWindowChecklistGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.NonWorkingReasonGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.PosmMappingGetterSetter;
@@ -80,6 +81,49 @@ public class XMLHandlers {
 
 
 
+                }
+                xpp.next();
+            }
+        } catch (XmlPullParserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return nonworking;
+    }
+
+    public static NonWorkingReasonGetterSetter nonWorkinReasonNewXML(XmlPullParser xpp,
+                                                                  int eventType) {
+        NonWorkingReasonGetterSetter nonworking = new NonWorkingReasonGetterSetter();
+
+        try {
+            while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
+                if (xpp.getEventType() == XmlPullParser.START_TAG) {
+
+                    if (xpp.getName().equals("META_DATA")) {
+                        nonworking.setNonworking_table(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("REASON_CD")) {
+                        nonworking.setReason_cd(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("REASON")) {
+                        nonworking.setReason(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("ENTRY_ALLOW")) {
+                        nonworking.setEntry_allow(xpp.nextText());
+                    }
+
+                    if (xpp.getName().equals("IMAGE_ALLOW")) {
+                        nonworking.setIMAGE_ALLOW(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("FOR_STORE")) {
+                        nonworking.setFOR_STORE(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("FOR_ATT")) {
+                        nonworking.setFOR_ATT(xpp.nextText());
+                    }
                 }
                 xpp.next();
             }
@@ -583,5 +627,70 @@ public class XMLHandlers {
             e.printStackTrace();
         }
         return windowMapping;
+    }
+
+
+    public static MappingUsrGetterSetter mappingUsrXML(XmlPullParser xpp,
+                                                                     int eventType) {
+        MappingUsrGetterSetter nonworking = new MappingUsrGetterSetter();
+
+        try {
+            while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
+                if (xpp.getEventType() == XmlPullParser.START_TAG) {
+
+                    if (xpp.getName().equals("META_DATA")) {
+                        nonworking.setTable_mappingUsr(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("USR_CD")) {
+                        nonworking.setUSR_CD(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("USR")) {
+                        nonworking.setUSR(xpp.nextText());
+                    }
+                }
+                xpp.next();
+            }
+        } catch (XmlPullParserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return nonworking;
+    }
+
+    public static NonWorkingReasonGetterSetter attendanceXML(XmlPullParser xpp,
+                                                       int eventType) {
+        NonWorkingReasonGetterSetter nonworking = new NonWorkingReasonGetterSetter();
+
+        try {
+            while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
+                if (xpp.getEventType() == XmlPullParser.START_TAG) {
+
+                    if (xpp.getName().equals("META_DATA")) {
+                        nonworking.setNonworking_table(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("CREATED_BY")) {
+                        nonworking.setUsername(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("VISIT_DATE")) {
+                        nonworking.setVisitdate(xpp.nextText());
+                    }
+                    if (xpp.getName().equals("REASON_CD")) {
+                        nonworking.setReason_cd(xpp.nextText());
+                    }
+
+                }
+                xpp.next();
+            }
+        } catch (XmlPullParserException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return nonworking;
     }
 }

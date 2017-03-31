@@ -17,6 +17,7 @@ import com.example.deepakp.gskgtsubd.gettersetter.BrandMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.CityMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.JCPMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.LineEntryGetterSetter;
+import com.example.deepakp.gskgtsubd.gettersetter.MappingUsrGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.MappingWindowChecklistGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.NonWorkingReasonGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.PosmEntryGetterSetter;
@@ -74,6 +75,9 @@ public class Database extends SQLiteOpenHelper {
         db.execSQL(TableBean.getTable_TownMaster());
         db.execSQL(TableBean.getTable_posmMapping());
         db.execSQL(TableBean.getNonworkingtable());
+        db.execSQL(TableBean.getNonworkingNewtable());
+        db.execSQL(TableBean.getMappingUsrTable());
+        db.execSQL(TableBean.getAttendanceTable());
         //   db.execSQL(CommonString.CREATE_TABLE_INSERT_ORDERENTRYHEADER_DATA);
         db.execSQL(CommonString.CREATE_TABLE_SECONDARY_WINDOW_CHILD_DATA);
         db.execSQL(CommonString.CREATE_TABLE_SECONDARY_WINDOW_HEADER_DATA);
@@ -86,6 +90,7 @@ public class Database extends SQLiteOpenHelper {
         db.execSQL(CommonString.CREATE_TABLE_ADDSTORE_SECONDARY_WINDOW_HEADER_DATA);
         db.execSQL(CommonString.CREATE_TABLE_ADDSTORE_POSM_DATA);
         db.execSQL(CommonString.CREATE_TABLE_ADDSTORE_LINE_ENTRY);
+        db.execSQL(CommonString.CREATE_TABLE_ATTENDANCE);
     }
 
 
@@ -146,24 +151,29 @@ public class Database extends SQLiteOpenHelper {
     }
 
     // getNonWorkingData
-    public ArrayList<NonWorkingReasonGetterSetter> getNonWorkingData() {
+    public ArrayList<NonWorkingReasonGetterSetter> getNonWorkingData(boolean fromStore) {
         Log.d("FetchingAssetdata--------------->Start<------------",
                 "------------------");
         ArrayList<NonWorkingReasonGetterSetter> list = new ArrayList<NonWorkingReasonGetterSetter>();
         Cursor dbcursor = null;
 
         try {
-
-            dbcursor = db
-                    .rawQuery(
-                            "SELECT * FROM NON_WORKING_REASON"
-                            , null);
+            if (fromStore) {
+                dbcursor = db
+                        .rawQuery(
+                                "SELECT -1 AS REASON_CD,'Select' as REASON,'-1' as ENTRY_ALLOW,'-1' AS IMAGE_ALLOW,'-1' AS FOR_STORE,'-1' AS FOR_ATT union SELECT * FROM NON_WORKING_REASON_NEW WHERE FOR_ATT ='1'"
+                                , null);
+            } else {
+                dbcursor = db
+                        .rawQuery(
+                                "SELECT -1 AS REASON_CD,'Select' as REASON,'-1' as ENTRY_ALLOW,'-1' AS IMAGE_ALLOW,'-1' AS FOR_STORE,'-1' AS FOR_ATT union SELECT * FROM NON_WORKING_REASON_NEW WHERE FOR_ATT ='1'"
+                                , null);
+            }
 
             if (dbcursor != null) {
                 dbcursor.moveToFirst();
                 while (!dbcursor.isAfterLast()) {
                     NonWorkingReasonGetterSetter sb = new NonWorkingReasonGetterSetter();
-
 
                     sb.setReason_cd(dbcursor.getString(dbcursor
                             .getColumnIndexOrThrow("REASON_CD")));
@@ -300,21 +310,15 @@ public class Database extends SQLiteOpenHelper {
             values.put("STORE_CD", Integer.parseInt(store_cd));
             values.put("COVERAGE_ID", Integer.parseInt(coverage_id));
             values.put("TOTAL_LINE_AVAILABLE", Integer.parseInt(data.getTotalLineAvailable()));
-            if(data.getNoOfBuildSkuLine().equalsIgnoreCase(""))
-            {
+            if (data.getNoOfBuildSkuLine().equalsIgnoreCase("")) {
                 values.put("NO_OF_SKULINE", "");
-            }
-            else
-            {
+            } else {
                 values.put("NO_OF_SKULINE", Integer.parseInt(data.getNoOfBuildSkuLine()));
             }
 
-             if(data.getTotalBillAmount().equalsIgnoreCase(""))
-            {
+            if (data.getTotalBillAmount().equalsIgnoreCase("")) {
                 values.put("TOTAL_BILL_AMOUNT", "");
-            }
-            else
-            {
+            } else {
                 values.put("TOTAL_BILL_AMOUNT", Integer.parseInt(data.getTotalBillAmount()));
             }
 
@@ -694,6 +698,36 @@ public class Database extends SQLiteOpenHelper {
 
         } catch (Exception ex) {
             Log.d("Database Exception while Insert Non Working Data ",
+                    ex.toString());
+        }
+
+    }
+
+
+//Non Working data
+
+    public void insertNonWorkingNewReasonData(NonWorkingReasonGetterSetter data) {
+
+        db.delete("NON_WORKING_REASON_NEW", null, null);
+        ContentValues values = new ContentValues();
+
+        try {
+
+            for (int i = 0; i < data.getReason_cd().size(); i++) {
+
+                values.put("REASON_CD", Integer.parseInt(data.getReason_cd().get(i)));
+                values.put("REASON", data.getReason().get(i));
+                values.put("ENTRY_ALLOW", data.getEntry_allow().get(i));
+                values.put("IMAGE_ALLOW", data.getIMAGE_ALLOW().get(i));
+                values.put("FOR_STORE", data.getFOR_STORE().get(i));
+                values.put("FOR_ATT", data.getFOR_ATT().get(i));
+
+                db.insert("NON_WORKING_REASON_NEW", null, values);
+
+            }
+
+        } catch (Exception ex) {
+            Log.d("Database Exception while Insert NON_WORKING_REASON_NEW ",
                     ex.toString());
         }
 
@@ -1925,6 +1959,8 @@ public class Database extends SQLiteOpenHelper {
             values.put("STORE_CD", "0");
             values.put("STORE_NAME", addNewStoreGetterSetter.getEd_StoreName());
             values.put("RETAILER_NAME", addNewStoreGetterSetter.getEd_RetailerName());
+            values.put("USR_CD", addNewStoreGetterSetter.getUsr_cd());
+            values.put("USR", addNewStoreGetterSetter.getUsr());
             values.put("ADDRESS", addNewStoreGetterSetter.getEd_Address());
             values.put("LANDMARK", addNewStoreGetterSetter.getEd_Landmark());
 
@@ -1961,6 +1997,7 @@ public class Database extends SQLiteOpenHelper {
         }
         return store_id;
     }
+
 
     ////Get List Data
 //
@@ -3034,6 +3071,7 @@ public class Database extends SQLiteOpenHelper {
                     od.setEd_Address(dbcursor.getString(dbcursor.getColumnIndexOrThrow("ADDRESS")));
                     od.setEd_Phone(String.valueOf(dbcursor.getInt(dbcursor.getColumnIndexOrThrow("PHONE"))));
                     od.setCity_CD(dbcursor.getInt(dbcursor.getColumnIndexOrThrow("CITY_CD")));
+                    od.setUsr_cd(dbcursor.getInt(dbcursor.getColumnIndexOrThrow("USR_CD")));
                     od.setTown_CD(dbcursor.getInt(dbcursor.getColumnIndexOrThrow("TOWN_CD")));
                     od.setState_cd(dbcursor.getInt(dbcursor.getColumnIndexOrThrow("STATE_CD")));
                     od.setState(dbcursor.getString(dbcursor.getColumnIndexOrThrow("STATE")));
@@ -3732,4 +3770,234 @@ public class Database extends SQLiteOpenHelper {
 //    }
 
 
+    //Save Add New Store Data
+    public long saveAttendanceData(String username, String visit_date, String reason_cd, String entry_allow) {
+        long id = 0;
+        db.delete(CommonString.TABLE_ATTENDANCE, "USERNAME = '" + username + "' and VISITDATE = '" + visit_date + "'", null);
+        try {
+            ContentValues values = new ContentValues();
+
+            values.put("USERNAME", username);
+            values.put("VISITDATE", visit_date);
+            values.put("REASON_CD", reason_cd);
+            values.put("ENTRY_ALLOW", entry_allow);
+            values.put("ATTENDANCE_STATUS", CommonString.KEY_C);
+
+            id = db.insert(CommonString.TABLE_ATTENDANCE, null, values);
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+
+    //Get  Window Master List by state_cd
+    public ArrayList<NonWorkingReasonGetterSetter> getAttendanceList(String username, String visitdate) {
+        ArrayList<NonWorkingReasonGetterSetter> list = new ArrayList<NonWorkingReasonGetterSetter>();
+        NonWorkingReasonGetterSetter addchecklist = null;
+        Cursor dbcursor = null;
+
+        try {
+            if (username == null) {
+                dbcursor = db.rawQuery("SELECT REASON_CD,ENTRY_ALLOW,ATTENDANCE_STATUS FROM ATTENDANCE WHERE VISITDATE <> '" + visitdate + "'", null);
+            } else {
+                dbcursor = db.rawQuery("SELECT REASON_CD,ENTRY_ALLOW,ATTENDANCE_STATUS FROM ATTENDANCE WHERE USERNAME = '" + username + "' AND VISITDATE = '" + visitdate + "'", null);
+            }
+
+
+            if (dbcursor != null) {
+                dbcursor.moveToFirst();
+                while (!dbcursor.isAfterLast()) {
+                    addchecklist = new NonWorkingReasonGetterSetter();
+                    addchecklist.setReason_cd(dbcursor.getString(dbcursor.getColumnIndexOrThrow("REASON_CD")));
+                    addchecklist.setEntry_allow(dbcursor.getString(dbcursor.getColumnIndexOrThrow("ENTRY_ALLOW")));
+                    addchecklist.setATTENDANCE_STATUS(dbcursor.getString(dbcursor.getColumnIndexOrThrow("ATTENDANCE_STATUS")));
+                    list.add(addchecklist);
+                    dbcursor.moveToNext();
+                }
+                dbcursor.close();
+
+                return list;
+            }
+
+        } catch (Exception e) {
+            Log.d("Exception !!", "  getAttendanceList" + e.toString());
+        }
+
+        Log.d("Fetch Data stop ", " getAttendanceList ->Stop<--");
+        return null;
+    }
+
+    public void updateAttendanceStatus(String username, String visitdate,
+                                       String status) {
+
+        try {
+            ContentValues values = new ContentValues();
+            values.put(CommonString.KEY_ATTENDANCE_STATUS, status);
+
+            db.update(CommonString.TABLE_ATTENDANCE, values,
+                    CommonString.KEY__USERNAME + "='" + username + "' AND "
+                            + "VISITDATE ='" + visitdate
+                            + "'", null);
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void insertMappingUsrData(MappingUsrGetterSetter data) {
+
+        db.delete("MAPPING_USR", null, null);
+        ContentValues values = new ContentValues();
+
+        try {
+
+            for (int i = 0; i < data.getUSR_CD().size(); i++) {
+
+                values.put("USR_CD", Integer.parseInt(data.getUSR_CD().get(i)));
+                values.put("USR", data.getUSR().get(i));
+
+                db.insert("MAPPING_USR", null, values);
+
+            }
+
+        } catch (Exception ex) {
+            Log.d("Database Exception while Insert MAPPING_USR ",
+                    ex.toString());
+        }
+
+    }
+
+
+    //Get  StoreTypeMasterList
+    public ArrayList<MappingUsrGetterSetter> getMappingUsrList() {
+        ArrayList<MappingUsrGetterSetter> list = new ArrayList<MappingUsrGetterSetter>();
+        MappingUsrGetterSetter addstoreType = null;
+        Cursor dbcursor = null;
+
+        try {
+            dbcursor = db.rawQuery("select 0 as USR_CD,'Select' as USR union select USR_CD,USR from MAPPING_USR", null);
+
+            if (dbcursor != null) {
+                dbcursor.moveToFirst();
+                while (!dbcursor.isAfterLast()) {
+                    addstoreType = new MappingUsrGetterSetter();
+                    addstoreType.setUSR_CD(dbcursor.getString(dbcursor.getColumnIndexOrThrow("USR_CD")));
+                    addstoreType.setUSR(dbcursor.getString(dbcursor.getColumnIndexOrThrow("USR")));
+                    list.add(addstoreType);
+
+                    dbcursor.moveToNext();
+                }
+                dbcursor.close();
+
+                return list;
+            }
+
+        } catch (Exception e) {
+            Log.d("Exception !!", " getMappingUsrList " + e.toString());
+        }
+
+        Log.d("Fetch Data stop ", " getMappingUsrList ->Stop<--");
+        return null;
+    }
+
+    public void deleteAttendanceData(String username, String visitdate) {
+
+        try {
+            db.delete(CommonString.TABLE_ATTENDANCE, CommonString.KEY__USERNAME + " = " + username + " and VISITDATE <> " + visitdate + "", null);
+        } catch (Exception ex) {
+            Log.d("Excep deleteAttendanceData data",
+                    ex.getMessage());
+        }
+    }
+
+    public void insertAttendanceData(NonWorkingReasonGetterSetter data) {
+
+        db.delete("ATTENDANCE_STATUS", null, null);
+        ContentValues values = new ContentValues();
+
+        try {
+
+            for (int i = 0; i < data.getReason_cd().size(); i++) {
+
+                values.put("CREATED_BY", data.getUsername());
+                values.put("VISIT_DATE", data.getVisitdate());
+                values.put("REASON_CD", Integer.parseInt(data.getReason_cd().get(i)));
+
+                db.insert("ATTENDANCE_STATUS", null, values);
+
+            }
+
+        } catch (Exception ex) {
+            Log.d("Database Exception while Insert ATTENDANCE_STATUS ",
+                    ex.toString());
+        }
+
+    }
+
+    //Get  Window Master List by state_cd
+    public ArrayList<NonWorkingReasonGetterSetter> getAttendanceListFromDownload(String username, String visitdate) {
+        ArrayList<NonWorkingReasonGetterSetter> list = new ArrayList<NonWorkingReasonGetterSetter>();
+        NonWorkingReasonGetterSetter addchecklist = null;
+        Cursor dbcursor = null;
+        try {
+
+            dbcursor = db.rawQuery("SELECT * FROM ATTENDANCE_STATUS WHERE VISIT_DATE = '" + visitdate + "' and CREATED_BY = '" + username + "'", null);
+
+            if (dbcursor != null) {
+                dbcursor.moveToFirst();
+                while (!dbcursor.isAfterLast()) {
+                    addchecklist = new NonWorkingReasonGetterSetter();
+                    addchecklist.setUsername(dbcursor.getString(dbcursor.getColumnIndexOrThrow("CREATED_BY")));
+                    addchecklist.setVisitdate(dbcursor.getString(dbcursor.getColumnIndexOrThrow("VISIT_DATE")));
+                    addchecklist.setReason_cd(dbcursor.getString(dbcursor.getColumnIndexOrThrow("REASON_CD")));
+                    list.add(addchecklist);
+                    dbcursor.moveToNext();
+                }
+                dbcursor.close();
+
+                return list;
+            }
+
+        } catch (Exception e)
+
+        {
+            Log.d("Exception !!", "  getAttendanceListFromDownload" + e.toString());
+        }
+
+        Log.d("Fetch Data stop ", " getAttendanceListFromDownload ->Stop<--");
+        return null;
+    }
+
+    //Get  Window Master List by state_cd
+    public ArrayList<NonWorkingReasonGetterSetter> getEntryAllowFromBrand(String reason_cd) {
+        ArrayList<NonWorkingReasonGetterSetter> list = new ArrayList<NonWorkingReasonGetterSetter>();
+        NonWorkingReasonGetterSetter addchecklist = null;
+        Cursor dbcursor = null;
+        try {
+
+            dbcursor = db.rawQuery("SELECT ENTRY_ALLOW FROM NON_WORKING_REASON_NEW WHERE REASON_CD = '"+ reason_cd +"'", null);
+
+            if (dbcursor != null) {
+                dbcursor.moveToFirst();
+                while (!dbcursor.isAfterLast()) {
+                    addchecklist = new NonWorkingReasonGetterSetter();
+                    addchecklist.setEntry_allow(dbcursor.getString(dbcursor.getColumnIndexOrThrow("ENTRY_ALLOW")));
+                    list.add(addchecklist);
+                    dbcursor.moveToNext();
+                }
+                dbcursor.close();
+
+                return list;
+            }
+
+        } catch (Exception e)
+
+        {
+            Log.d("Exception !!", "  getEntryAllowFromBrand" + e.toString());
+        }
+
+        Log.d("Fetch Data stop ", " getEntryAllowFromBrand ->Stop<--");
+        return null;
+    }
 }

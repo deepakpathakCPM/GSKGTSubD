@@ -9,6 +9,7 @@ public class CommonString {
     public static final String DATABASE_NAME = "GSKGTSubD_Databases";
 
     public static final String KEY_USERNAME = "username";
+    public static final String KEY__USERNAME = "USERNAME";
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_REMEMBER = "remember";
 
@@ -41,7 +42,7 @@ public class CommonString {
 
     //Url etc
     public static final String URL = "http://gsksubd.parinaam.in/GSKsubservice.asmx";
-    public static final String URL_Notice_Board = "http://visa.parinaam.in/notice/notice.html";
+    public static final String URL_Notice_Board = "http://gsksubd.parinaam.in/notice/notice.html";
     public static final String NAMESPACE = "http://tempuri.org/";
 
     public static final String METHOD_NAME_UNIVERSAL_DOWNLOAD = "Download_Universal";
@@ -183,6 +184,7 @@ public class CommonString {
     public static final String KEY_WINDOW_CD = "WINDOW_CD";
     public static final String KEY_WINDOW = "WINDOW";
     public static final String KEY_WINDOW_IMAGE = "WINDOW_IMAGE";
+    public static final String KEY_FROMSTORE = "FROMSTORE";
     public static final String KEY_PAID_OR_NONPAID = "PAID_OR_NONPAID";
 
 
@@ -286,7 +288,7 @@ public class CommonString {
 
 
     //Table POSM DATA
-    public static final String TABLE_POSM_DATA = "POSM_DATA";
+
     public static final String TABLE_ADDSTORE_POSM_DATA = "ADDSTORE_POSM_DATA";
 
     public static final String KEY_COMMON_ID = "COMMON_ID";
@@ -297,6 +299,7 @@ public class CommonString {
     public static final String KEY_QUANTITY = "QUANTITY";
     public static final String KEY_POSM_IMAGE = "POSM_IMAGE";
 
+    public static final String TABLE_POSM_DATA = "POSM_DATA";
     public static final String CREATE_TABLE_POSM_DATA = "CREATE TABLE "
             + TABLE_POSM_DATA
             + " ("
@@ -492,6 +495,8 @@ public class CommonString {
     public static final String TABLE_ADD_NEW_STORE = "Add_NewStore";
     public static final String TABLE_ADD_LINE_ENTRY = "LINE_ENTRY";
     public static final String TABLE_ADDSTORE_LINE_ENTRY = "ADDSTORE_LINE_ENTRY";
+    public static final String TABLE_ATTENDANCE = "ATTENDANCE";
+    public static final String KEY_ATTENDANCE_STATUS = "ATTENDANCE_STATUS";
 
     public static final String CREATE_TABLE_ADD_NEW_STORE = "CREATE TABLE IF NOT EXISTS "
             + TABLE_ADD_NEW_STORE +
@@ -502,6 +507,8 @@ public class CommonString {
             "VISIT_DATE VARCHAR," +
             "STORE_NAME VARCHAR," +
             "RETAILER_NAME VARCHAR," +
+            "USR_CD INTEGER," +
+            "USR VARCHAR," +
             "ADDRESS VARCHAR," +
             "LANDMARK VARCHAR," +
             "PHONE INTEGER," +
@@ -543,6 +550,18 @@ public class CommonString {
             "NO_OF_SKULINE INTEGER," +
             "TOTAL_BILL_AMOUNT INTEGER" +
             ")";
+
+    public static final String CREATE_TABLE_ATTENDANCE = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_ATTENDANCE +
+            " (" +
+            "ID INTEGER PRIMARY KEY AUTOINCREMENT ," +
+            "USERNAME VARCHAR," +
+            "VISITDATE VARCHAR," +
+            "REASON_CD INTEGER," +
+            "ENTRY_ALLOW INTEGER," +
+            "ATTENDANCE_STATUS VARCHAR" +
+            ")";
+
 
 
 }

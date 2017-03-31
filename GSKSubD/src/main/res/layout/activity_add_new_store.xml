@@ -122,7 +122,6 @@
                         </LinearLayout>
                     </LinearLayout>
 
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -299,7 +298,6 @@
                     </LinearLayout>
 
 
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -371,8 +369,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_weight="4"
                                 android:gravity="center"
-                                android:text=""
-                                />
+                                android:text="" />
 
                             <Button
                                 android:id="@+id/btn_dob"
@@ -574,7 +571,38 @@
                                 android:textAppearance="?android:attr/textAppearanceSmall" />
                         </LinearLayout>
                     </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".4"
+                            android:paddingBottom="5dp"
+                            android:paddingLeft="10dp"
+                            android:paddingTop="5dp"
+                            android:text="USR"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textColor="@color/teal_dark" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight=".6"
+                            android:background="@drawable/item_border_square_white"
+                            android:orientation="vertical">
+
+                            <Spinner
+                                android:id="@+id/spn_usr"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" />
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
 
             </LinearLayout>
@@ -586,7 +614,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            app:srcCompat="@android:drawable/ic_menu_save"/>
+            app:srcCompat="@android:drawable/ic_menu_save" />
 
     </RelativeLayout>
 

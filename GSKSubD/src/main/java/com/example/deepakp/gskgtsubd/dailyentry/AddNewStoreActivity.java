@@ -33,6 +33,7 @@ import com.example.deepakp.gskgtsubd.database.Database;
 import com.example.deepakp.gskgtsubd.gettersetter.AddNewStoreGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.AnswerMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.CityMasterGetterSetter;
+import com.example.deepakp.gskgtsubd.gettersetter.MappingUsrGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.StateMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.StoreTypeMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.TownMasterGetterSetter;
@@ -51,15 +52,15 @@ public class AddNewStoreActivity extends AppCompatActivity {
     Toolbar toolbar;
 
     EditText ed_StoreName, ed_RetailerName, ed_Landmark, ed_Address, ed_Phone, ed_subdistributername;
-    Spinner sp_City, sp_storeFormat, retailerSmartphone, sp_State, sp_town;
+    Spinner sp_City, sp_storeFormat, retailerSmartphone, sp_State, sp_town, spn_usr;
     ImageView img_AddNewStoreCamera;
     TextView dob_txt, doa_txt, global_tv;
     Button dob_btn, doa_btn;
     FloatingActionButton fab_save;
     private SharedPreferences preferences;
     Database db;
-    int city_cd, storeType_cd, town_cd;
-    ArrayAdapter<String> cityAdapter, stateAdapter, storeTypeAdapter, answerAdapter, townAdapter;
+    int city_cd, storeType_cd, town_cd, usr_cd;
+    ArrayAdapter<String> cityAdapter, stateAdapter, storeTypeAdapter, answerAdapter, townAdapter, usrAdapter;
 
     AddNewStoreGetterSetter addNewStoreGetterSetter;
 
@@ -76,6 +77,7 @@ public class AddNewStoreActivity extends AppCompatActivity {
 
     ArrayList<CityMasterGetterSetter> cityList = new ArrayList<>();
     ArrayList<TownMasterGetterSetter> townList = new ArrayList<>();
+    ArrayList<MappingUsrGetterSetter> usrList = new ArrayList<>();
     ArrayList<StateMasterGetterSetter> stateList;
     ArrayList<StoreTypeMasterGetterSetter> storeTypeList;
     ArrayList<AnswerMasterGetterSetter> answerList;
@@ -116,6 +118,7 @@ public class AddNewStoreActivity extends AppCompatActivity {
         stateList = db.getStateMasterList();
         storeTypeList = db.getStoreTypeMasterList();
         answerList = db.getAnswerMasterList(false);
+        usrList = db.getMappingUsrList();
 
         //------------for state Master List---------------
         stateAdapter = new ArrayAdapter<>(AddNewStoreActivity.this, android.R.layout.simple_spinner_item);
@@ -162,10 +165,21 @@ public class AddNewStoreActivity extends AppCompatActivity {
         retailerSmartphone.setAdapter(answerAdapter);
         //------------------------------------------------
 
+        //------------for USR List---------------
+        usrAdapter = new ArrayAdapter<>(AddNewStoreActivity.this, android.R.layout.simple_spinner_item);
+        for (int i = 0; i < usrList.size(); i++) {
+            usrAdapter.add(usrList.get(i).getUSR().get(0));
+        }
+        usrAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_usr.setAdapter(usrAdapter);
+        //------------------------------------------------
+
+
         sp_City.setOnItemSelectedListener(onItemSelectedListener);
         sp_storeFormat.setOnItemSelectedListener(onItemSelectedListener);
         sp_State.setOnItemSelectedListener(onItemSelectedListener);
         sp_town.setOnItemSelectedListener(onItemSelectedListener);
+        spn_usr.setOnItemSelectedListener(onItemSelectedListener);
 
         img_AddNewStoreCamera.setOnClickListener(onClickListener);
         dob_btn.setOnClickListener(onClickListener);
@@ -197,8 +211,10 @@ public class AddNewStoreActivity extends AppCompatActivity {
                     try {
                         if (validate(addNewStoreGetterSetter)) {
 
-                            addNewStoreGetterSetter.setEd_StoreName(ed_StoreName.getText().toString());
+                            addNewStoreGetterSetter.setEd_StoreName(ed_StoreName.getText().toString().replaceAll("[&^<>{}'$]"," "));
                             addNewStoreGetterSetter.setEd_RetailerName(ed_RetailerName.getText().toString());
+                            addNewStoreGetterSetter.setUsr_cd(usr_cd);
+                            addNewStoreGetterSetter.setUsr(spn_usr.getSelectedItem().toString());
                             addNewStoreGetterSetter.setEd_Address(ed_Address.getText().toString());
                             addNewStoreGetterSetter.setEd_Landmark(ed_Landmark.getText().toString());
                             addNewStoreGetterSetter.setCity_CD(city_cd);
@@ -294,6 +310,9 @@ public class AddNewStoreActivity extends AppCompatActivity {
                 case R.id.answer_spinner:
                     answercd = Integer.parseInt(answerList.get(position).getANSWER_CD().get(0));
                     break;
+                case R.id.spn_usr:
+                    usr_cd = Integer.parseInt(usrList.get(position).getUSR_CD().get(0));
+                    break;
             }
         }
 
@@ -315,7 +334,12 @@ public class AddNewStoreActivity extends AppCompatActivity {
                 || ed_RetailerName.getText() == null) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please fill retailer name");
-        } else if (ed_Address.getText().toString().equalsIgnoreCase("")
+        }
+       /* else if (spn_usr.getSelectedItemPosition() == 0 || usr_cd == -1) {
+            flag = false;
+            AlertAndMessages.showAlertMessage(context, "Please select USR");
+        } */
+        else if (ed_Address.getText().toString().equalsIgnoreCase("")
                 || ed_Address.getText() == null) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please fill Address");
@@ -376,6 +400,7 @@ public class AddNewStoreActivity extends AppCompatActivity {
         dob_btn = (Button) findViewById(R.id.btn_dob);
         doa_btn = (Button) findViewById(R.id.btn_doa);
         retailerSmartphone = (Spinner) findViewById(R.id.spinner_smartphone);
+        spn_usr = (Spinner) findViewById(R.id.spn_usr);
         ed_subdistributername = (EditText) findViewById(R.id.ed_subdistributername);
         sp_storeFormat = (Spinner) findViewById(R.id.storeformat_spinner);
         img_AddNewStoreCamera = (ImageView) findViewById(R.id.img_AddNewStoreCamera);
@@ -438,7 +463,7 @@ public class AddNewStoreActivity extends AppCompatActivity {
     protected void showDatePickerDialog(TextView textView) {
         global_tv = textView;
         DatePickerDialog datePickerDialog = new DatePickerDialog(this, pickerListener, year, month, day);
-       // ((ViewGroup) datePickerDialog.getDatePicker()).findViewById(Resources.getSystem().getIdentifier("year", "id", "android")).setVisibility(View.GONE);
+        // ((ViewGroup) datePickerDialog.getDatePicker()).findViewById(Resources.getSystem().getIdentifier("year", "id", "android")).setVisibility(View.GONE);
         //datePickerDialog.findViewById(Resources.getSystem().getIdentifier("year", "id", "android")).setVisibility(View.GONE);
         datePickerDialog.setTitle("");
         datePickerDialog.show();
@@ -466,17 +491,17 @@ public class AddNewStoreActivity extends AppCompatActivity {
                               int selectedMonth, int selectedDay) {
 
             year = selectedYear;
-            month = selectedMonth+1;
+            month = selectedMonth + 1;
             day = selectedDay;
 
-            String day_str =String.valueOf(day);
-            day_str="00"+day_str;
-            day_str=day_str.substring(day_str.length()-2, day_str.length());
+            String day_str = String.valueOf(day);
+            day_str = "00" + day_str;
+            day_str = day_str.substring(day_str.length() - 2, day_str.length());
 
 
-            String month_str =String.valueOf(month);
-            month_str="00"+month_str;
-            month_str=month_str.substring(month_str.length()-2, month_str.length());
+            String month_str = String.valueOf(month);
+            month_str = "00" + month_str;
+            month_str = month_str.substring(month_str.length() - 2, month_str.length());
 
 
          /*   global_tv.setText(new StringBuilder().append(month + 1)
@@ -484,7 +509,7 @@ public class AddNewStoreActivity extends AppCompatActivity {
                     .append(" "));*/
 
             global_tv.setText(new StringBuilder().append(day_str).append("-").append(month_str)
-                    );
+            );
 
 
         }

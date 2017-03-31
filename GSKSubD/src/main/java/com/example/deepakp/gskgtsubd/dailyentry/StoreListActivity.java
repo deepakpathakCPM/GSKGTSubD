@@ -201,7 +201,8 @@ public class StoreListActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Intent in = new Intent(StoreListActivity.this, CheckoutActivity.class)
-                                    .putExtra(CommonString.KEY_STORE_CD, String.valueOf(as.getStore_id()));
+                                    .putExtra(CommonString.KEY_STORE_CD, String.valueOf(as.getStore_id()))
+                                    .putExtra(CommonString.KEY_FROMSTORE, true);
                             startActivity(in);
                         }
                     };

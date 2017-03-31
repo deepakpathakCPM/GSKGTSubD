@@ -74,7 +74,6 @@ public class DailyEntryActivity extends AppCompatActivity {
         recData.setIconImg(R.drawable.add_stores);
         data.add(recData);
 
-
         adapter = new ValueAdapter(getApplicationContext(), data);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));

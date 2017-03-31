@@ -310,9 +310,15 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
         } else if (edt_quantity.getText().toString().equalsIgnoreCase("")) {
             isgood = false;
             AlertAndMessages.showToastMessage(context, "Please fill quantity");
-        } else if (image == "") {
-            isgood = false;
-            AlertAndMessages.showToastMessage(context, "Please click image");
+        } else if (!(edt_quantity.getText().toString().equalsIgnoreCase(""))
+                && (Integer.parseInt(edt_quantity.getText().toString())>0))
+        {
+            if(image == "")
+            {
+                isgood = false;
+                AlertAndMessages.showToastMessage(context, "Please click image");
+            }
+
         }
         return isgood;
     }

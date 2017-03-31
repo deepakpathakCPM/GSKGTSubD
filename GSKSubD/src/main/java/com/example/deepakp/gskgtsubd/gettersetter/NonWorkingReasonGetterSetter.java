@@ -6,6 +6,59 @@ public class NonWorkingReasonGetterSetter {
 	
 	String nonworking_table;
 	String informto;
+	String username;
+	String visitdate;
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getVisitdate() {
+		return visitdate;
+	}
+
+	public void setVisitdate(String visitdate) {
+		this.visitdate = visitdate;
+	}
+
+	ArrayList<String> reason_cd=new ArrayList<String>();
+	ArrayList<String> reason=new ArrayList<String>();
+	ArrayList<String> entry_allow=new ArrayList<>();
+	ArrayList<String> IMAGE_ALLOW =new ArrayList<>();
+
+	public ArrayList<String> getFOR_STORE() {
+		return FOR_STORE;
+	}
+
+	public void setFOR_STORE(String FOR_STORE) {
+		this.FOR_STORE.add(FOR_STORE);
+	}
+
+	public ArrayList<String> getFOR_ATT() {
+		return FOR_ATT;
+	}
+
+	public void setFOR_ATT(String FOR_ATT) {
+		this.FOR_ATT.add(FOR_ATT);
+	}
+
+	ArrayList<String> FOR_STORE =new ArrayList<>();
+	ArrayList<String> FOR_ATT =new ArrayList<>();
+
+	public ArrayList<String> getATTENDANCE_STATUS() {
+		return ATTENDANCE_STATUS;
+	}
+
+	public void setATTENDANCE_STATUS(String ATTENDANCE_STATUS) {
+		this.ATTENDANCE_STATUS.add(ATTENDANCE_STATUS);
+	}
+
+	ArrayList<String> ATTENDANCE_STATUS =new ArrayList<>();
+
 
 	public String getInformto() {
 		return informto;
@@ -16,9 +69,7 @@ public class NonWorkingReasonGetterSetter {
 	}
 
 
-	ArrayList<String> reason_cd=new ArrayList<String>();
-	ArrayList<String> reason=new ArrayList<String>();
-	ArrayList<String> entry_allow=new ArrayList<>();
+
 
 	public ArrayList<String> getIMAGE_ALLOW() {
 		return IMAGE_ALLOW;
@@ -28,7 +79,6 @@ public class NonWorkingReasonGetterSetter {
 		this.IMAGE_ALLOW.add(IMAGE_ALLOW);
 	}
 
-	ArrayList<String> IMAGE_ALLOW =new ArrayList<>();
 
 	public String getNonworking_table() {
 		return nonworking_table;

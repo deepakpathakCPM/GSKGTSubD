@@ -20,6 +20,26 @@ public class TableBean {
     }
 
     public static String nonworkingtable;
+    public static String nonworkingNewtable;
+
+    public static String getMappingUsrTable() {
+        return mappingUsrTable;
+    }
+
+    public static void setMappingUsrTable(String mappingUsrTable) {
+        TableBean.mappingUsrTable = mappingUsrTable;
+    }
+
+    public static String mappingUsrTable;
+
+    public static String getNonworkingNewtable() {
+        return nonworkingNewtable;
+    }
+
+    public static void setNonworkingNewtable(String nonworkingNewtable) {
+        TableBean.nonworkingNewtable = nonworkingNewtable;
+    }
+
     public static String table_posmMapping;
     public static String table_BrandMaster;
     public static String table_PosmMaster;
@@ -136,5 +156,13 @@ public class TableBean {
         TableBean.table_CityMaster = table_CityMaster;
     }
 
+    public static String getAttendanceTable() {
+        return attendanceTable;
+    }
 
+    public static void setAttendanceTable(String attendanceTable) {
+        TableBean.attendanceTable = attendanceTable;
+    }
+
+    public static String attendanceTable;
 }

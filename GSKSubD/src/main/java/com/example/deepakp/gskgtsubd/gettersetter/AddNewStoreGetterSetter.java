@@ -22,6 +22,7 @@ public class AddNewStoreGetterSetter implements Serializable {
     String ed_RetailerName = "";
     String ed_Address = "";
     String ed_Landmark = "";
+    String usr = "";
     String City = "";
     String Town = "";
     String state = "";
@@ -36,6 +37,7 @@ public class AddNewStoreGetterSetter implements Serializable {
     String CHECKOUT_STATUS = "";
     int City_CD;
     int Town_CD;
+    int usr_cd;
     int state_cd;
     int store_id;
     int storeType_CD;
@@ -53,7 +55,21 @@ public class AddNewStoreGetterSetter implements Serializable {
     public void setTown_CD(int town_CD) {
         Town_CD = town_CD;
     }
+    public int getUsr_cd() {
+        return usr_cd;
+    }
 
+    public String getUsr() {
+        return usr;
+    }
+
+    public void setUsr(String usr) {
+        this.usr = usr;
+    }
+
+    public void setUsr_cd(int usr_cd) {
+        this.usr_cd = usr_cd;
+    }
     public void setTown(String town) {
         Town = town;
     }

@@ -22,6 +22,7 @@ import com.example.deepakp.gskgtsubd.database.Database;
 import com.example.deepakp.gskgtsubd.gettersetter.AddNewStoreGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.FailureGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.LineEntryGetterSetter;
+import com.example.deepakp.gskgtsubd.gettersetter.NonWorkingReasonGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.PosmEntryGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.WindowChecklistGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.WindowMasterGetterSetter;
@@ -74,6 +75,7 @@ public class UploadDataActivity extends AppCompatActivity {
     private ArrayList<PosmEntryGetterSetter> PosmEntryData = new ArrayList<>();
     private ArrayList<WindowMasterGetterSetter> windowData = new ArrayList<>();
     private ArrayList<WindowChecklistGetterSetter> window_Child_Data = new ArrayList<>();
+    private ArrayList<NonWorkingReasonGetterSetter> attendanceList = new ArrayList<>();
 
     private FailureGetterSetter failureGetterSetter = null;
 
@@ -877,6 +879,10 @@ public class UploadDataActivity extends AppCompatActivity {
                                         + addNewStoreList.get(j).getCity_CD()
                                         + "[/CITY_CD]"
 
+                                        + "[USR_CD]"
+                                        + addNewStoreList.get(j).getUsr_cd()
+                                        + "[/USR_CD]"
+
                                         + "[TOWN_CD]"
                                         + addNewStoreList.get(j).getTown_CD()
                                         + "[/TOWN_CD]"
@@ -1459,6 +1465,66 @@ public class UploadDataActivity extends AppCompatActivity {
 
                     }
 
+                }
+
+
+                attendanceList = database.getAttendanceList(username, visit_date);
+
+                if (attendanceList.size() > 0) {
+                    if(attendanceList.get(0).getATTENDANCE_STATUS().get(0).equalsIgnoreCase(CommonString.KEY_C))
+                    {
+                        String onXML = "[ATTENDANCE_DATA]"
+                                + "[USER_NAME]" + username + "[/USER_NAME]"
+                                + "[REASON_CD]" + attendanceList.get(0).getATTENDANCE_STATUS().get(0) + "[/REASON_CD]"
+                                + "[VISIT_DATE]" + visit_date + "[/VISIT_DATE]"
+                                + "[/ATTENDANCE_DATA]";
+
+                        final String sos_xml = "[DATA]" + onXML
+                                + "[/DATA]";
+                        SoapObject request = new SoapObject(
+                                CommonString.NAMESPACE, CommonString.METHOD_UPLOAD_XML);
+                        request.addProperty("XMLDATA", sos_xml);
+                        request.addProperty("KEYS", "ATTENDANCE_DATA");
+                        request.addProperty("USERNAME", username);
+                        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
+                                SoapEnvelope.VER11);
+                        envelope.dotNet = true;
+                        envelope.setOutputSoapObject(request);
+
+                        HttpTransportSE androidHttpTransport = new HttpTransportSE(
+                                CommonString.URL);
+
+                        androidHttpTransport.call(
+                                CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
+                                envelope);
+                        Object result = (Object) envelope.getResponse();
+
+
+                        if (result.toString().equalsIgnoreCase(
+                                CommonString.KEY_NO_DATA)) {
+                            return "Upload_Attendance_Status";
+                        }
+
+                        if (result.toString().equalsIgnoreCase(
+                                CommonString.KEY_FAILURE)) {
+                            return "Upload_Attendance_Status";
+                        }
+
+                        // for failure
+                        data.value = 100;
+                        data.name = "Attendance Done";
+                        publishProgress(data);
+
+                        if (result.toString()
+                                .equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                            database.updateAttendanceStatus(username, visit_date, CommonString.KEY_U);
+                        } else {
+                            if (result.toString().equalsIgnoreCase(
+                                    CommonString.KEY_FALSE)) {
+                                return CommonString.KEY_Upload_Store_ChecOut_Status;
+                            }
+                        }
+                    }
                 }
 
 

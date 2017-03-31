@@ -30,10 +30,12 @@ import com.example.deepakp.gskgtsubd.R;
 import com.example.deepakp.gskgtsubd.bean.CoverageBean;
 import com.example.deepakp.gskgtsubd.constants.CommonString;
 import com.example.deepakp.gskgtsubd.dailyentry.DailyEntryActivity;
+import com.example.deepakp.gskgtsubd.dailyentry.MyAttendanceActivity;
 import com.example.deepakp.gskgtsubd.database.Database;
 import com.example.deepakp.gskgtsubd.download.CompleteDownloadActivity;
 import com.example.deepakp.gskgtsubd.fragment.MainFragment;
 import com.example.deepakp.gskgtsubd.gettersetter.AddNewStoreGetterSetter;
+import com.example.deepakp.gskgtsubd.gettersetter.NonWorkingReasonGetterSetter;
 import com.example.deepakp.gskgtsubd.upload.UploadDataActivity;
 import com.example.deepakp.gskgtsubd.utilities.AlertAndMessages;
 
@@ -55,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements
     private ArrayList<AddNewStoreGetterSetter> list = new ArrayList<AddNewStoreGetterSetter>();
     private ArrayList<CoverageBean> coveragelist_jcpstore = new ArrayList<CoverageBean>();
     private ArrayList<CoverageBean> coveragelist_addstore = new ArrayList<CoverageBean>();
+    private ArrayList<NonWorkingReasonGetterSetter> attendanceList = new ArrayList<NonWorkingReasonGetterSetter>();
+    private ArrayList<NonWorkingReasonGetterSetter> attendanceList2 = new ArrayList<NonWorkingReasonGetterSetter>();
+    private ArrayList<NonWorkingReasonGetterSetter> entryAllowFromReasonList = new ArrayList<NonWorkingReasonGetterSetter>();
     Database db;
     private String date;
     String str;
@@ -115,9 +120,16 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-
         db = new Database(MainActivity.this);
         db.open();
+
+        if (preferences.getBoolean(CommonString.KEY_ISDATADOWNLOADED, false)) {
+            attendanceList = db.getAttendanceList(null, visit_date);
+            if (attendanceList.size() > 0) {
+                db.deleteAttendanceData(user_name, visit_date);
+            }
+        }
+
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         MainFragment cartfrag = new MainFragment();
@@ -141,17 +153,41 @@ public class MainActivity extends AppCompatActivity implements
 
         if (id == R.id.nav_daily_entry) {
 
-           // list = db.getStateMasterList();
-            if (!preferences.getBoolean(CommonString.KEY_ISDATADOWNLOADED,false)) {
+            // list = db.getStateMasterList();
+            if (!preferences.getBoolean(CommonString.KEY_ISDATADOWNLOADED, false)) {
                 Toast.makeText(getBaseContext(), "Please Download Data First",
                         Toast.LENGTH_LONG).show();
-            }
-            else
-            {
-                Intent in = new Intent(getApplicationContext(), DailyEntryActivity.class);
-                startActivity(in);
-                overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
+            } else {
+                attendanceList = db.getAttendanceList(user_name, visit_date);
+                attendanceList2 = db.getAttendanceListFromDownload(user_name, visit_date);
+                if (attendanceList.size() > 0 || attendanceList2.size() > 0) {
 
+                    if (attendanceList.size() > 0) {
+                        if (attendanceList.get(0).getEntry_allow().get(0).equalsIgnoreCase("1")) {
+                            Intent in = new Intent(getApplicationContext(), DailyEntryActivity.class);
+                            startActivity(in);
+                            overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
+                        } else {
+                            AlertAndMessages.showToastMessage(context, "Entry is not allowed.");
+                        }
+                    } else if (attendanceList2.size() > 0) {
+                        entryAllowFromReasonList = db.getEntryAllowFromBrand(attendanceList2.get(0).getReason_cd().get(0));
+                        if (entryAllowFromReasonList.size() > 0) {
+                            if (entryAllowFromReasonList.get(0).getEntry_allow().get(0).equalsIgnoreCase("1")) {
+                                Intent in = new Intent(getApplicationContext(), DailyEntryActivity.class);
+                                startActivity(in);
+                                overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
+                            } else {
+                                AlertAndMessages.showToastMessage(context, "Entry is not allowed.");
+                            }
+                        }
+
+                    }
+
+
+                } else {
+                    AlertAndMessages.showToastMessage(context, "Please mark the attendance first.");
+                }
             }
         } else if (id == R.id.nav_download) {
             // Download data
@@ -187,6 +223,25 @@ public class MainActivity extends AppCompatActivity implements
 
             isNetworkAvailable(h, 3000);
             //finish();
+        } else if (id == R.id.nav_attendance) {
+
+            if (!preferences.getBoolean(CommonString.KEY_ISDATADOWNLOADED, false)) {
+                Toast.makeText(getBaseContext(), "Please Download Data First",
+                        Toast.LENGTH_LONG).show();
+            } else {
+
+                attendanceList2 = db.getAttendanceListFromDownload(user_name, visit_date);
+                attendanceList = db.getAttendanceList(user_name, visit_date);
+                if (attendanceList.size() == 0 && attendanceList2.size() == 0) {
+                    Intent in = new Intent(getApplicationContext(), MyAttendanceActivity.class);
+                    startActivity(in);
+                    overridePendingTransition(R.anim.activity_in, R.anim.activity_out);
+
+                } else {
+                    AlertAndMessages.showToastMessage(context, "Attendence has been marked already");
+                }
+            }
+
         } else if (id == R.id.nav_upload) {
             //Upload data
             boolean isvalid = true;

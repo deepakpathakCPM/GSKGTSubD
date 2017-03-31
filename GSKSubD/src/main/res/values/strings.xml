@@ -31,5 +31,6 @@
     <string name="title_Total_Bill_Amount">Total Billed Amount</string>
     <string name="title_activity_secondary_window">SecondaryWindowActivity</string>
     <string name="title_activity_checkout">CheckoutActivity</string>
+    <string name="title_activity_my_attendance">MyAttendanceActivity</string>
 
 </resources>

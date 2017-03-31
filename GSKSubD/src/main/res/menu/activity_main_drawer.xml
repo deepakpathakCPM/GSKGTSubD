@@ -11,6 +11,10 @@
             android:icon="@drawable/ic_menu_send"
             android:title="Download" />
         <item
+            android:id="@+id/nav_attendance"
+            android:icon="@drawable/ic_menu_send"
+            android:title="Attendance" />
+        <item
             android:id="@+id/nav_upload"
             android:icon="@drawable/ic_menu_send"
             android:title="Upload" />

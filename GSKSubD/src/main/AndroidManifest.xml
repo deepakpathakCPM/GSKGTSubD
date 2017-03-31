@@ -95,7 +95,11 @@
             android:name=".dailyentry.CheckoutActivity"
             android:label="@string/title_activity_checkout"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".autoUpdate.AutoUpdateActivity"></activity>
+        <activity android:name=".autoUpdate.AutoUpdateActivity" />
+        <activity
+            android:name=".dailyentry.MyAttendanceActivity"
+            android:label="Attendance"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

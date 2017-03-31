@@ -21,6 +21,7 @@ import com.example.deepakp.gskgtsubd.database.Database;
 import com.example.deepakp.gskgtsubd.gettersetter.BrandMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.CityMasterGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.JCPMasterGetterSetter;
+import com.example.deepakp.gskgtsubd.gettersetter.MappingUsrGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.MappingWindowChecklistGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.NonWorkingReasonGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.PosmMappingGetterSetter;
@@ -74,7 +75,8 @@ public class CompleteDownloadActivity extends AppCompatActivity {
     MappingWindowChecklistGetterSetter mappingWindowChecklistGetterSetter;
     WindowChecklistAnswerGetterSetter windowChecklistAnswerGetterSetter;
     WindowMappingGetterSetter windowMappingGetterSetter;
-    NonWorkingReasonGetterSetter nonworkinggettersetter;
+    NonWorkingReasonGetterSetter nonworkinggettersetter,attendancegettersetter,nonworkingNewgettersetter;
+    MappingUsrGetterSetter mappingUsrGetterSetter;
 
 
     @Override
@@ -632,6 +634,131 @@ public class CompleteDownloadActivity extends AppCompatActivity {
 
                 publishProgress(data);
 
+                //Non Working Reason data
+                request = new SoapObject(CommonString.NAMESPACE,
+                        CommonString.METHOD_NAME_UNIVERSAL_DOWNLOAD);
+
+                request.addProperty("UserName", _UserId);
+                request.addProperty("Type", "NON_WORKING_REASON_NEW");
+
+                envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+                envelope.dotNet = true;
+                envelope.setOutputSoapObject(request);
+
+                androidHttpTransport = new HttpTransportSE(CommonString.URL);
+
+                androidHttpTransport.call(
+                        CommonString.SOAP_ACTION_UNIVERSAL, envelope);
+                Object resultnonworkingnew = (Object) envelope.getResponse();
+
+                if (resultnonworkingnew.toString() != null) {
+
+                    xpp.setInput(new StringReader(resultnonworkingnew.toString()));
+                    xpp.next();
+                    eventType = xpp.getEventType();
+
+                    nonworkingNewgettersetter = XMLHandlers.nonWorkinReasonNewXML(xpp, eventType);
+
+                    if (nonworkingNewgettersetter.getReason_cd().size() > 0) {
+                        resultHttp = CommonString.KEY_SUCCESS;
+                        String nonworkingtable = nonworkingNewgettersetter.getNonworking_table();
+                        TableBean.setNonworkingNewtable(nonworkingtable);
+
+                    } else {
+                        return "NON_WORKING_REASON_NEW";
+                    }
+
+                    data.value = 95;
+                    data.name = "NON_WORKING_REASON_NEW Downloading";
+                }
+
+                publishProgress(data);
+
+
+                //MAPPING_USR data
+                request = new SoapObject(CommonString.NAMESPACE,
+                        CommonString.METHOD_NAME_UNIVERSAL_DOWNLOAD);
+
+                request.addProperty("UserName", _UserId);
+                request.addProperty("Type", "MAPPING_USR");
+
+                envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+                envelope.dotNet = true;
+                envelope.setOutputSoapObject(request);
+
+                androidHttpTransport = new HttpTransportSE(CommonString.URL);
+
+                androidHttpTransport.call(
+                        CommonString.SOAP_ACTION_UNIVERSAL, envelope);
+                Object resultmappingusr = (Object) envelope.getResponse();
+
+                if (resultmappingusr.toString() != null) {
+
+                    xpp.setInput(new StringReader(resultmappingusr.toString()));
+                    xpp.next();
+                    eventType = xpp.getEventType();
+
+                    mappingUsrGetterSetter = XMLHandlers.mappingUsrXML(xpp, eventType);
+
+                    String nonworkingtable = mappingUsrGetterSetter.getTable_mappingUsr();
+                    TableBean.setMappingUsrTable(nonworkingtable);
+
+                    if (mappingUsrGetterSetter.getUSR_CD().size() > 0) {
+                        resultHttp = CommonString.KEY_SUCCESS;
+                    }
+                  /*  else {
+                        return "MAPPING_USR";
+                    }
+*/
+                    data.value = 95;
+                    data.name = "MAPPING_USR Downloading";
+                }
+
+                publishProgress(data);
+
+
+                //MAPPING_USR data
+                request = new SoapObject(CommonString.NAMESPACE,
+                        CommonString.METHOD_NAME_UNIVERSAL_DOWNLOAD);
+
+                request.addProperty("UserName", _UserId);
+                request.addProperty("Type", "ATTENDANCE_STATUS");
+
+                envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+                envelope.dotNet = true;
+                envelope.setOutputSoapObject(request);
+
+                androidHttpTransport = new HttpTransportSE(CommonString.URL);
+
+                androidHttpTransport.call(
+                        CommonString.SOAP_ACTION_UNIVERSAL, envelope);
+                Object resultattendance = (Object) envelope.getResponse();
+
+                if (resultattendance.toString() != null) {
+
+                    xpp.setInput(new StringReader(resultattendance.toString()));
+                    xpp.next();
+                    eventType = xpp.getEventType();
+
+                    attendancegettersetter = XMLHandlers.attendanceXML(xpp, eventType);
+
+                    String nonworkingtable = attendancegettersetter.getNonworking_table();
+                    TableBean.setAttendanceTable(nonworkingtable);
+
+                    if (attendancegettersetter.getReason_cd().size() > 0) {
+                        resultHttp = CommonString.KEY_SUCCESS;
+                    }
+                  /*  else {
+                        return "MAPPING_USR";
+                    }
+*/
+                    data.value = 95;
+                    data.name = "ATTENDANCE_STATUS Downloading";
+                }
+
+                publishProgress(data);
+
+
                 db.open();
 
                 if(jcpMasterGetterSetter.getSTORE_CD().size()>0)
@@ -652,6 +779,15 @@ public class CompleteDownloadActivity extends AppCompatActivity {
                 db.insertWindowChecklistAnswerData(windowChecklistAnswerGetterSetter);
                 db.insertWindowMappingData(windowMappingGetterSetter);
                 db.insertNonWorkingReasonData(nonworkinggettersetter);
+                db.insertNonWorkingNewReasonData(nonworkingNewgettersetter);
+
+                if(mappingUsrGetterSetter.getUSR_CD().size()>0)
+                {
+                    db.insertMappingUsrData(mappingUsrGetterSetter);
+                }
+                db.insertAttendanceData(attendancegettersetter);
+
+
                 editor = preferences.edit();
                 editor.putBoolean(CommonString.KEY_ISDATADOWNLOADED,true);
                 editor.commit();

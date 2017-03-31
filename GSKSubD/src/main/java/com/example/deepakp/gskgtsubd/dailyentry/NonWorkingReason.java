@@ -95,7 +95,7 @@ public class NonWorkingReason extends AppCompatActivity implements
         database.open();
         str = CommonString.FILE_PATH;
 
-        reasondata = database.getNonWorkingData();
+        reasondata = database.getNonWorkingData(true);
       //  subreasondata = database.getNonWorkingSubReasonData();
         /*cdata = database.getCoverageData(visit_date, null);
         storedata = database.getStoreData(visit_date);*/
@@ -532,14 +532,10 @@ public class NonWorkingReason extends AppCompatActivity implements
         int id = item.getItemId();
 
         if (id == android.R.id.home) {
-
             // NavUtils.navigateUpFromSameTask(this);
             finish();
-
             overridePendingTransition(R.anim.activity_back_in, R.anim.activity_back_out);
-
         }
-
         return super.onOptionsItemSelected(item);
     }
 }
