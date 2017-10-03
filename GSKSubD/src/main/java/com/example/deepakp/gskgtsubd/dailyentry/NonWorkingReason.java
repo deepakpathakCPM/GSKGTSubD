@@ -106,7 +106,6 @@ public class NonWorkingReason extends AppCompatActivity implements
 
         reason_adapter = new ArrayAdapter<CharSequence>(this,
                 android.R.layout.simple_spinner_item);
-        reason_adapter.add("Select Reason");
         for (int i = 0; i < reasondata.size(); i++) {
             reason_adapter.add(reasondata.get(i).getReason().get(0));
         }
@@ -146,10 +145,10 @@ public class NonWorkingReason extends AppCompatActivity implements
         switch (arg0.getId()) {
             case R.id.spinner2:
                 if (position != 0) {
-                    reasonname = reasondata.get(position - 1).getReason().get(0);
-                    reasonid = reasondata.get(position - 1).getReason_cd().get(0);
-                    entry_allow = reasondata.get(position - 1).getEntry_allow().get(0);
-                    image_allow = reasondata.get(position - 1).getIMAGE_ALLOW().get(0);
+                    reasonname = reasondata.get(position).getReason().get(0);
+                    reasonid = reasondata.get(position).getReason_cd().get(0);
+                    entry_allow = reasondata.get(position).getEntry_allow().get(0);
+                    image_allow = reasondata.get(position).getIMAGE_ALLOW().get(0);
                     //image = reasondata.get(position - 1).getImage();
                     //	entry = reasondata.get(position - 1).getEntry();
                     //reason_reamrk = reasondata.get(position - 1).getREASON_REMARK();

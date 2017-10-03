@@ -130,6 +130,10 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
 
+        if (db.isAddStoreDataUploaded(visit_date, CommonString.KEY_U)) {
+            db.deleteAddStoreData(visit_date, CommonString.KEY_U);
+        }
+
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         MainFragment cartfrag = new MainFragment();

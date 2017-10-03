@@ -440,7 +440,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
-
             if (success) {
                 finish();
             } else {

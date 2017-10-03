@@ -161,7 +161,7 @@ public class Database extends SQLiteOpenHelper {
             if (fromStore) {
                 dbcursor = db
                         .rawQuery(
-                                "SELECT -1 AS REASON_CD,'Select' as REASON,'-1' as ENTRY_ALLOW,'-1' AS IMAGE_ALLOW,'-1' AS FOR_STORE,'-1' AS FOR_ATT union SELECT * FROM NON_WORKING_REASON_NEW WHERE FOR_ATT ='1'"
+                                "SELECT -1 AS REASON_CD,'Select' as REASON,'-1' as ENTRY_ALLOW,'-1' AS IMAGE_ALLOW,'-1' AS FOR_STORE,'-1' AS FOR_ATT union SELECT * FROM NON_WORKING_REASON_NEW WHERE FOR_STORE ='1'"
                                 , null);
             } else {
                 dbcursor = db
@@ -1640,34 +1640,7 @@ public class Database extends SQLiteOpenHelper {
             return list;
         }
 
-        public ArrayList<OrderEntrySKUGetterSetter> getOrderEntrySKUPerCategory(String category) {
-            ArrayList<OrderEntrySKUGetterSetter> list = new ArrayList<>();
 
-            Cursor cr = null;
-            cr = db.rawQuery("Select * from SKU_MASTER  as s " +
-                    "inner join (select * from BRAND_MASTER where CATEGORY_CD=?) as b " +
-                    "where s.BRAND_CD=b.BRAND_CD", new String[]{category});
-            if (cr != null) {
-                if (cr.moveToFirst()) {
-                    do {
-                        OrderEntrySKUGetterSetter skuOrder = new OrderEntrySKUGetterSetter();
-                        skuOrder.setSku_cd(cr.getString(0));
-                        skuOrder.setSku(cr.getString(1));
-                        skuOrder.setSku_brand_cd(cr.getString(2));
-                        skuOrder.setSku_sequence(cr.getString(3));
-                        skuOrder.setBrand_cd(cr.getString(4));
-                        skuOrder.setBrand(cr.getString(5));
-                        skuOrder.setCategory_cd(cr.getString(6));
-                        skuOrder.setCompany_cd(cr.getString(7));
-                        skuOrder.setBrand_sequence(cr.getString(8));
-
-                        list.add(skuOrder);
-                    } while (cr.moveToNext());
-                }
-                cr.close();
-            }
-            return list;
-        }
 
         // getCoverageData
 
@@ -3999,5 +3972,44 @@ public class Database extends SQLiteOpenHelper {
 
         Log.d("Fetch Data stop ", " getEntryAllowFromBrand ->Stop<--");
         return null;
+    }
+
+    public void deleteAddStoreData(String visitdate,String status) {
+
+        try {
+            db.delete(CommonString.TABLE_ADD_NEW_STORE, CommonString.KEY_VISIT_DATE + " <> '"+ visitdate+"' and "+CommonString.KEY_UPLOAD_STATUS+" = '"+status+"'", null);
+        } catch (Exception ex) {
+            Log.d("Excep delete AddStore data",
+                    ex.toString());
+        }
+    }
+
+    public boolean isAddStoreDataUploaded(String visit_date,String status) {
+        boolean filled = false;
+
+        Cursor dbcursor = null;
+
+        try {
+            dbcursor = db
+                    .rawQuery(
+                            "SELECT * FROM "+CommonString.TABLE_ADD_NEW_STORE+" " + "where "
+                                    + CommonString.KEY_VISIT_DATE +  " <> '" + visit_date + "' and "+CommonString.KEY_UPLOAD_STATUS+" = '"+status+"'", null);
+            if (dbcursor != null) {
+                dbcursor.moveToFirst();
+                int icount = dbcursor.getInt(0);
+                dbcursor.close();
+                if (icount > 0) {
+                    filled = true;
+                } else {
+                    filled = false;
+                }
+            }
+
+        } catch (Exception e) {
+            Log.d("Exception isempty", e.toString());
+            return filled;
+        }
+
+        return filled;
     }
 }

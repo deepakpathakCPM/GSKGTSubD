@@ -204,7 +204,7 @@ public class SecondaryWindowActivity extends AppCompatActivity implements View.O
                     }*/
 
                     long common_id[] = db.insertWindowData(windowList, store_cd, coverage_id, answer);
-                    if (common_id[0] > 0) {
+                    if (common_id.length>0 && common_id[0] > 0) {
                         long id = db.insertWindowChildData(common_id, store_cd, coverage_id, windowList, map);
                         if (id > 0) {
                             AlertAndMessages.showToastMessage(context, "Data saved");

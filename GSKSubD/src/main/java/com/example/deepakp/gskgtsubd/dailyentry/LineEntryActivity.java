@@ -69,7 +69,7 @@ public class LineEntryActivity extends AppCompatActivity implements View.OnClick
 
                     lineEntryGetterSetter = new LineEntryGetterSetter();
                     lineEntryGetterSetter.setTotalLineAvailable(totalLine_edt.getText().toString());
-                    lineEntryGetterSetter.setNoOfBuildSkuLine(buildSkuLine_edt.getText().toString());
+                    lineEntryGetterSetter.setNoOfBuildSkuLine("0");
                     lineEntryGetterSetter.setTotalBillAmount(billAmount_edt.getText().toString());
 
                     long id = db.insertLineEntryData(lineEntryGetterSetter,store_id,coverage_id);
@@ -118,10 +118,11 @@ public class LineEntryActivity extends AppCompatActivity implements View.OnClick
         }
 
         if(store_id.equalsIgnoreCase("0")) {
-            if (buildSkuLine_edt.getText().toString().equalsIgnoreCase("")) {
+           /* if (buildSkuLine_edt.getText().toString().equalsIgnoreCase("")) {
                 isGood = false;
                 AlertAndMessages.showToastMessage(context, "Please type no of build sku line");
-            } else if (billAmount_edt.getText().toString().equalsIgnoreCase("")) {
+            } */
+            if (billAmount_edt.getText().toString().equalsIgnoreCase("")) {
                 isGood = false;
                 AlertAndMessages.showToastMessage(context, "Please type total bill amount");
             }
@@ -153,7 +154,7 @@ public class LineEntryActivity extends AppCompatActivity implements View.OnClick
         for(int i=0;i<lineEntryList.size();i++)
         {
             totalLine_edt.setText(lineEntryList.get(i).getTotalLineAvailable());
-            buildSkuLine_edt.setText(lineEntryList.get(i).getNoOfBuildSkuLine());
+            //buildSkuLine_edt.setText(lineEntryList.get(i).getNoOfBuildSkuLine());
             billAmount_edt.setText(lineEntryList.get(i).getTotalBillAmount());
         }
 

@@ -212,11 +212,11 @@ public class AddNewStoreActivity extends AppCompatActivity {
                         if (validate(addNewStoreGetterSetter)) {
 
                             addNewStoreGetterSetter.setEd_StoreName(ed_StoreName.getText().toString().replaceAll("[&^<>{}'$]"," "));
-                            addNewStoreGetterSetter.setEd_RetailerName(ed_RetailerName.getText().toString());
+                            addNewStoreGetterSetter.setEd_RetailerName(ed_RetailerName.getText().toString().replaceAll("[&^<>{}'$]"," "));
                             addNewStoreGetterSetter.setUsr_cd(usr_cd);
                             addNewStoreGetterSetter.setUsr(spn_usr.getSelectedItem().toString());
-                            addNewStoreGetterSetter.setEd_Address(ed_Address.getText().toString());
-                            addNewStoreGetterSetter.setEd_Landmark(ed_Landmark.getText().toString());
+                            addNewStoreGetterSetter.setEd_Address(ed_Address.getText().toString().replaceAll("[&^<>{}'$]"," "));
+                            addNewStoreGetterSetter.setEd_Landmark(ed_Landmark.getText().toString().replaceAll("[&^<>{}'$]"," "));
                             addNewStoreGetterSetter.setCity_CD(city_cd);
                             addNewStoreGetterSetter.setCity(sp_City.getSelectedItem().toString());
                             addNewStoreGetterSetter.setTown_CD((town_cd));
@@ -330,33 +330,42 @@ public class AddNewStoreActivity extends AppCompatActivity {
                 || ed_StoreName.getText() == null) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please fill store name");
-        } else if (ed_RetailerName.getText().toString().equalsIgnoreCase("")
+        }
+        /*else if (ed_RetailerName.getText().toString().equalsIgnoreCase("")
                 || ed_RetailerName.getText() == null) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please fill retailer name");
-        }
+        }*/
        /* else if (spn_usr.getSelectedItemPosition() == 0 || usr_cd == -1) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please select USR");
         } */
-        else if (ed_Address.getText().toString().equalsIgnoreCase("")
+       /* else if (ed_Address.getText().toString().equalsIgnoreCase("")
                 || ed_Address.getText() == null) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please fill Address");
-        } else if (ed_Landmark.getText().toString().equalsIgnoreCase("")
+        } */
+        /*else if (ed_Landmark.getText().toString().equalsIgnoreCase("")
                 || ed_Landmark.getText() == null) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please fill Landmark");
-        } else if (sp_City.getSelectedItemPosition() == 0) {
-            AlertAndMessages.showToastMessage(context, "Please Select City");
+        } */
+        else if (sp_State.getSelectedItemPosition() == 0) {
+            AlertAndMessages.showToastMessage(context, "Please Select state");
             flag = false;
-        } else if (sp_town.getSelectedItemPosition() == 0) {
-            AlertAndMessages.showToastMessage(context, "Please Select Town");
+        }
+        else if (sp_City.getSelectedItemPosition() == 0) {
+            AlertAndMessages.showToastMessage(context, "Please Select Super Town");
             flag = false;
-        } else if (ed_Phone.getText().toString().equalsIgnoreCase("") || ed_Phone.getText().toString().length() > 10) {
+        }
+        else if (sp_town.getSelectedItemPosition() == 0) {
+            AlertAndMessages.showToastMessage(context, "Please Select Sub Town");
+            flag = false;
+        } else if (ed_Phone.getText().toString().equalsIgnoreCase("") || ed_Phone.getText().toString().length() !=10) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please fill the 10 digit phone number...");
-        } else if (dob_txt.getText().toString().equalsIgnoreCase("")) {
+        }
+      /*  else if (dob_txt.getText().toString().equalsIgnoreCase("")) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please select date of birth");
         } else if (doa_txt.getText().toString().equalsIgnoreCase("")) {
@@ -368,17 +377,17 @@ public class AddNewStoreActivity extends AppCompatActivity {
         } else if (ed_subdistributername.getText().toString().equalsIgnoreCase("")) {
             flag = false;
             AlertAndMessages.showAlertMessage(context, "Please select Sub-distributer name");
-        } else if (_taken == false) {
+        }
+        else if (_taken == false) {
 
             AlertAndMessages.showToastMessage(getApplicationContext(), "Please Click Store Image");
             flag = false;
-        } else if (sp_storeFormat.getSelectedItemPosition() == 0) {
+        } */
+        else if (sp_storeFormat.getSelectedItemPosition() == 0) {
             AlertAndMessages.showToastMessage(context, "Please Select Channel");
             flag = false;
-        } else if (sp_State.getSelectedItemPosition() == 0) {
-            AlertAndMessages.showToastMessage(context, "Please Select state");
-            flag = false;
-        } else {
+        }
+        else {
             flag = true;
         }
 
@@ -405,7 +414,8 @@ public class AddNewStoreActivity extends AppCompatActivity {
         sp_storeFormat = (Spinner) findViewById(R.id.storeformat_spinner);
         img_AddNewStoreCamera = (ImageView) findViewById(R.id.img_AddNewStoreCamera);
         fab_save = (FloatingActionButton) findViewById(R.id.fab_save);
-
+        dob_txt.setText("0-0");
+        doa_txt.setText("0-0");
     }
 
     public class Status {
@@ -465,6 +475,7 @@ public class AddNewStoreActivity extends AppCompatActivity {
         DatePickerDialog datePickerDialog = new DatePickerDialog(this, pickerListener, year, month, day);
         // ((ViewGroup) datePickerDialog.getDatePicker()).findViewById(Resources.getSystem().getIdentifier("year", "id", "android")).setVisibility(View.GONE);
         //datePickerDialog.findViewById(Resources.getSystem().getIdentifier("year", "id", "android")).setVisibility(View.GONE);
+        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
         datePickerDialog.setTitle("");
         datePickerDialog.show();
     }

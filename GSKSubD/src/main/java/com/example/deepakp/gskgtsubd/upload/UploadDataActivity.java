@@ -26,6 +26,7 @@ import com.example.deepakp.gskgtsubd.gettersetter.NonWorkingReasonGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.PosmEntryGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.WindowChecklistGetterSetter;
 import com.example.deepakp.gskgtsubd.gettersetter.WindowMasterGetterSetter;
+import com.example.deepakp.gskgtsubd.upload.Retrofit_method.UploadImageWithRetrofit;
 import com.example.deepakp.gskgtsubd.utilities.AlertAndMessages;
 import com.example.deepakp.gskgtsubd.xmlHandler.FailureXMLHandler;
 
@@ -42,6 +43,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -150,7 +154,7 @@ public class UploadDataActivity extends AppCompatActivity {
             // TODO Auto-generated method stub
 
             try {
-
+                UploadImageWithRetrofit uploadRetro = new UploadImageWithRetrofit(context);
                 data = new Data();
 
                 coverageBeanlist = database.getCoverageData(visit_date);
@@ -170,419 +174,420 @@ public class UploadDataActivity extends AppCompatActivity {
                     if (!coverageBeanlist.get(i).getStatus()
                             .equalsIgnoreCase(CommonString.KEY_U)) {
 
-                        String onXML = "[DATA][USER_DATA][STORE_CD]"
-                                + coverageBeanlist.get(i).getStoreId()
-                                + "[/STORE_CD]" + "[VISIT_DATE]"
-                                + coverageBeanlist.get(i).getVisitDate()
-                                + "[/VISIT_DATE][LATITUDE]"
-                                + coverageBeanlist.get(i).getLatitude()
-                                + "[/LATITUDE][APP_VERSION]"
-                                + app_ver
-                                + "[/APP_VERSION][LONGITUDE]"
-                                + coverageBeanlist.get(i).getLongitude()
-                                + "[/LONGITUDE][IN_TIME]"
-                                + coverageBeanlist.get(i).getInTime()
-                                + "[/IN_TIME][OUT_TIME]"
-                                + coverageBeanlist.get(i).getOutTime()
-                                + "[/OUT_TIME][UPLOAD_STATUS]"
-                                + "N"
-                                + "[/UPLOAD_STATUS][USER_ID]" + username
-                                + "[/USER_ID][IMAGE_URL]" + coverageBeanlist.get(i).getImage()
-                                + "[/IMAGE_URL][REASON_ID]"
-                                + coverageBeanlist.get(i).getReasonid()
-                                + "[/REASON_ID]"
-                                + "[REASON_REMARK]"
-                                + coverageBeanlist.get(i).getRemark()
-                                + "[/REASON_REMARK][/USER_DATA][/DATA]";
+                        String onXML = "", final_xml = "";
+                        if (!coverageBeanlist.get(i).getStatus().equalsIgnoreCase(CommonString.KEY_D)) {
+
+                            onXML = "[DATA][USER_DATA][STORE_CD]"
+                                    + coverageBeanlist.get(i).getStoreId()
+                                    + "[/STORE_CD]" + "[VISIT_DATE]"
+                                    + coverageBeanlist.get(i).getVisitDate()
+                                    + "[/VISIT_DATE][LATITUDE]"
+                                    + coverageBeanlist.get(i).getLatitude()
+                                    + "[/LATITUDE][APP_VERSION]"
+                                    + app_ver
+                                    + "[/APP_VERSION][LONGITUDE]"
+                                    + coverageBeanlist.get(i).getLongitude()
+                                    + "[/LONGITUDE][IN_TIME]"
+                                    + coverageBeanlist.get(i).getInTime()
+                                    + "[/IN_TIME][OUT_TIME]"
+                                    + coverageBeanlist.get(i).getOutTime()
+                                    + "[/OUT_TIME][UPLOAD_STATUS]"
+                                    + "N"
+                                    + "[/UPLOAD_STATUS][USER_ID]" + username
+                                    + "[/USER_ID][IMAGE_URL]" + coverageBeanlist.get(i).getImage()
+                                    + "[/IMAGE_URL][REASON_ID]"
+                                    + coverageBeanlist.get(i).getReasonid()
+                                    + "[/REASON_ID]"
+                                    + "[REASON_REMARK]"
+                                    + coverageBeanlist.get(i).getRemark()
+                                    + "[/REASON_REMARK][/USER_DATA][/DATA]";
 
 
-                        SoapObject request = new SoapObject(
-                                CommonString.NAMESPACE,
-                                CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE);
-                        request.addProperty("onXML", onXML);
+                            SoapObject request = new SoapObject(
+                                    CommonString.NAMESPACE,
+                                    CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE);
+                            request.addProperty("onXML", onXML);
 
-                        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                                SoapEnvelope.VER11);
-                        envelope.dotNet = true;
-                        envelope.setOutputSoapObject(request);
+                            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
+                                    SoapEnvelope.VER11);
+                            envelope.dotNet = true;
+                            envelope.setOutputSoapObject(request);
+                            HttpTransportSE androidHttpTransport = new HttpTransportSE(CommonString.URL);
 
-                        HttpTransportSE androidHttpTransport = new HttpTransportSE(
-                                CommonString.URL);
+                            androidHttpTransport.call(
+                                    CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE,
+                                    envelope);
+                            Object result = (Object) envelope.getResponse();
 
-                        androidHttpTransport.call(
-                                CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE,
-                                envelope);
-                        Object result = (Object) envelope.getResponse();
+                            datacheck = result.toString();
+                            datacheck = datacheck.replace("\"", "");
+                            words = datacheck.split("\\;");
+                            validity = (words[0]);
 
-                        datacheck = result.toString();
-                        datacheck = datacheck.replace("\"", "");
-                        words = datacheck.split("\\;");
-                        validity = (words[0]);
-
-                        if (validity
-                                .equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                            if (validity
+                                    .equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
                           /*  database.updateCoverageStatus(coverageBeanlist
                                     .get(i).getMID(), CommonString.KEY_P);
 */
-                            database.updateStoreStatus(
-                                    coverageBeanlist.get(i).getStoreId(),
-                                    coverageBeanlist.get(i).getVisitDate(),
-                                    CommonString.KEY_P);
-                        } else {
+                                database.updateStoreStatus(
+                                        coverageBeanlist.get(i).getStoreId(),
+                                        coverageBeanlist.get(i).getVisitDate(),
+                                        CommonString.KEY_P);
+                            } else {
 
 
-                            if (!result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_SUCCESS)) {
+                                if (!result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_SUCCESS)) {
 
-                                return CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE;
+                                    return CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE;
+                                }
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_FALSE)) {
+                                    return CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE;
+                                }
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_FAILURE)) {
+                                    return CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE;
+                                }
+
                             }
 
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_FALSE)) {
-                                return CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE;
-                            }
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_FAILURE)) {
-                                return CommonString.METHOD_UPLOAD_DR_STORE_COVERAGE;
-                            }
+                            mid = Integer.parseInt((words[1]));
 
-                        }
+                            data.value = 80;
+                            data.name = "Uploading";
 
-                        mid = Integer.parseInt((words[1]));
-
-                        data.value = 80;
-                        data.name = "Uploading";
-
-                        publishProgress(data);
+                            publishProgress(data);
 
 
 ///////window1 DATA
-                        String final_xml = "";
-                        onXML = "";
-                        lineEntry = database.getLineEntryData(coverageBeanlist.get(i).getStoreId(), String.valueOf(coverageBeanlist.get(i).getMID()));
+                            final_xml = "";
+                            onXML = "";
+                            lineEntry = database.getLineEntryData(coverageBeanlist.get(i).getStoreId(), String.valueOf(coverageBeanlist.get(i).getMID()));
 
-                        if (lineEntry.size() > 0) {
+                            if (lineEntry.size() > 0) {
 
-                            for (int j = 0; j < lineEntry.size(); j++) {
+                                for (int j = 0; j < lineEntry.size(); j++) {
 
-                                onXML = "[LINE_ENTRY_DATA][MID]"
-                                        + mid
-                                        + "[/MID]"
-                                        + "[CREATED_BY]"
-                                        + username
-                                        + "[/CREATED_BY]"
-                                        + "[TOTAL_LINE_AVAILABLE]"
-                                        + lineEntry.get(j).getTotalLineAvailable()
-                                        + "[/TOTAL_LINE_AVAILABLE]"
-                                        + "[NO_OF_SKULINE]"
-                                        + lineEntry.get(j).getNoOfBuildSkuLine()
-                                        + "[/NO_OF_SKULINE]"
-                                        + "[TOTAL_BILL_AMOUNT]"
-                                        + lineEntry.get(j).getTotalBillAmount()
-                                        + "[/TOTAL_BILL_AMOUNT]"
-                                        + "[/LINE_ENTRY_DATA]";
+                                    onXML = "[LINE_ENTRY_DATA][MID]"
+                                            + mid
+                                            + "[/MID]"
+                                            + "[CREATED_BY]"
+                                            + username
+                                            + "[/CREATED_BY]"
+                                            + "[TOTAL_LINE_AVAILABLE]"
+                                            + lineEntry.get(j).getTotalLineAvailable()
+                                            + "[/TOTAL_LINE_AVAILABLE]"
+                                            + "[NO_OF_SKULINE]"
+                                            + lineEntry.get(j).getNoOfBuildSkuLine()
+                                            + "[/NO_OF_SKULINE]"
+                                            + "[TOTAL_BILL_AMOUNT]"
+                                            + lineEntry.get(j).getTotalBillAmount()
+                                            + "[/TOTAL_BILL_AMOUNT]"
+                                            + "[/LINE_ENTRY_DATA]";
 
 
-                                final_xml = final_xml + onXML;
+                                    final_xml = final_xml + onXML;
+
+                                }
+
+                                final String sos_xml = "[DATA]" + final_xml
+                                        + "[/DATA]";
+
+                                request = new SoapObject(
+                                        CommonString.NAMESPACE,
+                                        CommonString.METHOD_UPLOAD_XML);
+                                request.addProperty("XMLDATA", sos_xml);
+                                request.addProperty("KEYS", "LINE_ENTRY_DATA");
+                                request.addProperty("USERNAME", username);
+                                request.addProperty("MID", mid);
+
+                                envelope = new SoapSerializationEnvelope(
+                                        SoapEnvelope.VER11);
+                                envelope.dotNet = true;
+                                envelope.setOutputSoapObject(request);
+
+                                androidHttpTransport = new HttpTransportSE(
+                                        CommonString.URL);
+
+                                androidHttpTransport.call(
+                                        CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
+                                        envelope);
+                                result = (Object) envelope.getResponse();
+
+
+                                if (!result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_SUCCESS)) {
+
+                                    return "LINE_ENTRY_DATA";
+                                }
+
+
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_NO_DATA)) {
+                                    return CommonString.METHOD_UPLOAD_XML;
+                                }
+
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_FAILURE)) {
+                                    return CommonString.METHOD_UPLOAD_XML;
+                                }
 
                             }
 
-                            final String sos_xml = "[DATA]" + final_xml
-                                    + "[/DATA]";
 
-                            request = new SoapObject(
-                                    CommonString.NAMESPACE,
-                                    CommonString.METHOD_UPLOAD_XML);
-                            request.addProperty("XMLDATA", sos_xml);
-                            request.addProperty("KEYS", "LINE_ENTRY_DATA");
-                            request.addProperty("USERNAME", username);
-                            request.addProperty("MID", mid);
+                            data.value = 80;
+                            data.name = "LINE_ENTRY_DATA";
 
-                            envelope = new SoapSerializationEnvelope(
-                                    SoapEnvelope.VER11);
-                            envelope.dotNet = true;
-                            envelope.setOutputSoapObject(request);
-
-                            androidHttpTransport = new HttpTransportSE(
-                                    CommonString.URL);
-
-                            androidHttpTransport.call(
-                                    CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
-                                    envelope);
-                            result = (Object) envelope.getResponse();
-
-
-                            if (!result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_SUCCESS)) {
-
-                                return "LINE_ENTRY_DATA";
-                            }
-
-
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_NO_DATA)) {
-                                return CommonString.METHOD_UPLOAD_XML;
-                            }
-
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_FAILURE)) {
-                                return CommonString.METHOD_UPLOAD_XML;
-                            }
-
-                        }
-
-
-                        data.value = 80;
-                        data.name = "LINE_ENTRY_DATA";
-
-                        publishProgress(data);
+                            publishProgress(data);
 
 
 ///////PosmEntry DATA
-                        final_xml = "";
-                        onXML = "";
-                        PosmEntryData = database.getPosmEntryData(coverageBeanlist.get(i).getStoreId(), String.valueOf(coverageBeanlist.get(i).getMID()));
+                            final_xml = "";
+                            onXML = "";
+                            PosmEntryData = database.getPosmEntryData(coverageBeanlist.get(i).getStoreId(), String.valueOf(coverageBeanlist.get(i).getMID()));
 
-                        if (PosmEntryData.size() > 0) {
+                            if (PosmEntryData.size() > 0) {
 
-                            for (int j = 0; j < PosmEntryData.size(); j++) {
+                                for (int j = 0; j < PosmEntryData.size(); j++) {
 
-                                onXML = "[POSM_ENTRY_DATA][MID]"
-                                        + mid
-                                        + "[/MID]"
-                                        + "[CREATED_BY]"
-                                        + username
-                                        + "[/CREATED_BY]"
-                                        + "[BRAND_CD]"
-                                        + PosmEntryData.get(j).getBrand_cd()
-                                        + "[/BRAND_CD]"
-                                        + "[POSM_CD]"
-                                        + PosmEntryData.get(j).getPosm_cd()
-                                        + "[/POSM_CD]"
-                                        + "[QUANTITY]"
-                                        + PosmEntryData.get(j).getQuantity()
-                                        + "[/QUANTITY]"
-                                        + "[IMAGE]"
-                                        + PosmEntryData.get(j).getImage()
-                                        + "[/IMAGE]"
-                                        + "[/POSM_ENTRY_DATA]";
+                                    onXML = "[POSM_ENTRY_DATA][MID]"
+                                            + mid
+                                            + "[/MID]"
+                                            + "[CREATED_BY]"
+                                            + username
+                                            + "[/CREATED_BY]"
+                                            + "[BRAND_CD]"
+                                            + PosmEntryData.get(j).getBrand_cd()
+                                            + "[/BRAND_CD]"
+                                            + "[POSM_CD]"
+                                            + PosmEntryData.get(j).getPosm_cd()
+                                            + "[/POSM_CD]"
+                                            + "[QUANTITY]"
+                                            + PosmEntryData.get(j).getQuantity()
+                                            + "[/QUANTITY]"
+                                            + "[IMAGE]"
+                                            + PosmEntryData.get(j).getImage()
+                                            + "[/IMAGE]"
+                                            + "[/POSM_ENTRY_DATA]";
 
-                                final_xml = final_xml + onXML;
+                                    final_xml = final_xml + onXML;
 
+                                }
+
+                                final String sos_xml = "[DATA]" + final_xml
+                                        + "[/DATA]";
+
+                                request = new SoapObject(
+                                        CommonString.NAMESPACE,
+                                        CommonString.METHOD_UPLOAD_XML);
+                                request.addProperty("XMLDATA", sos_xml);
+                                request.addProperty("KEYS", "POSM_ENTRY_DATA");
+                                request.addProperty("USERNAME", username);
+                                request.addProperty("MID", mid);
+
+                                envelope = new SoapSerializationEnvelope(
+                                        SoapEnvelope.VER11);
+                                envelope.dotNet = true;
+                                envelope.setOutputSoapObject(request);
+
+                                androidHttpTransport = new HttpTransportSE(
+                                        CommonString.URL);
+
+                                androidHttpTransport.call(
+                                        CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
+                                        envelope);
+                                result = (Object) envelope.getResponse();
+
+                                if (!result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_SUCCESS)) {
+
+                                    return "POSM_ENTRY_DATA";
+                                }
+
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_NO_DATA)) {
+                                    return CommonString.METHOD_UPLOAD_XML;
+                                }
+
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_FAILURE)) {
+                                    return CommonString.METHOD_UPLOAD_XML;
+                                }
                             }
 
-                            final String sos_xml = "[DATA]" + final_xml
-                                    + "[/DATA]";
+                            data.value = 80;
+                            data.name = "POSM_ENTRY_DATA";
 
-                            request = new SoapObject(
-                                    CommonString.NAMESPACE,
-                                    CommonString.METHOD_UPLOAD_XML);
-                            request.addProperty("XMLDATA", sos_xml);
-                            request.addProperty("KEYS", "POSM_ENTRY_DATA");
-                            request.addProperty("USERNAME", username);
-                            request.addProperty("MID", mid);
-
-                            envelope = new SoapSerializationEnvelope(
-                                    SoapEnvelope.VER11);
-                            envelope.dotNet = true;
-                            envelope.setOutputSoapObject(request);
-
-                            androidHttpTransport = new HttpTransportSE(
-                                    CommonString.URL);
-
-                            androidHttpTransport.call(
-                                    CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
-                                    envelope);
-                            result = (Object) envelope.getResponse();
-
-                            if (!result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_SUCCESS)) {
-
-                                return "POSM_ENTRY_DATA";
-                            }
-
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_NO_DATA)) {
-                                return CommonString.METHOD_UPLOAD_XML;
-                            }
-
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_FAILURE)) {
-                                return CommonString.METHOD_UPLOAD_XML;
-                            }
-                        }
-
-                        data.value = 80;
-                        data.name = "POSM_ENTRY_DATA";
-
-                        publishProgress(data);
+                            publishProgress(data);
 
 // window data
 
-                        final_xml = "";
-                        onXML = "";
-                        windowData = database.getSavedWindowData(coverageBeanlist.get(i).getStoreId(), String.valueOf(coverageBeanlist.get(i).getMID()));
+                            final_xml = "";
+                            onXML = "";
+                            windowData = database.getSavedWindowData(coverageBeanlist.get(i).getStoreId(), String.valueOf(coverageBeanlist.get(i).getMID()));
 
-                        if (windowData.size() > 0) {
+                            if (windowData.size() > 0) {
 
-                            for (int j = 0; j < windowData.size(); j++) {
+                                for (int j = 0; j < windowData.size(); j++) {
 
-                                String isExist = "";
-                                if (windowData.get(j).isWINDOW_EXIST()) {
-                                    isExist = "1";
-                                } else {
-                                    isExist = "0";
+                                    String isExist = "";
+                                    if (windowData.get(j).isWINDOW_EXIST()) {
+                                        isExist = "1";
+                                    } else {
+                                        isExist = "0";
+                                    }
+
+                                    onXML = "[WINDOW_DATA][MID]"
+                                            + mid
+                                            + "[/MID]"
+                                            + "[CREATED_BY]"
+                                            + username
+                                            + "[/CREATED_BY]"
+                                            + "[WINDOW_CD]"
+                                            + windowData.get(j).getWINDOW_CD().get(0)
+                                            + "[/WINDOW_CD]"
+                                            + "[WINDOW_EXISTS]"
+                                            + isExist
+                                            + "[/WINDOW_EXISTS]"
+                                            + "[WINDOW_IMAGE]"
+                                            + windowData.get(j).getWINDOW_IMAGE()
+                                            + "[/WINDOW_IMAGE]"
+                                            + "[/WINDOW_DATA]";
+
+                                    final_xml = final_xml + onXML;
+
                                 }
 
-                                onXML = "[WINDOW_DATA][MID]"
-                                        + mid
-                                        + "[/MID]"
-                                        + "[CREATED_BY]"
-                                        + username
-                                        + "[/CREATED_BY]"
-                                        + "[WINDOW_CD]"
-                                        + windowData.get(j).getWINDOW_CD().get(0)
-                                        + "[/WINDOW_CD]"
-                                        + "[WINDOW_EXISTS]"
-                                        + isExist
-                                        + "[/WINDOW_EXISTS]"
-                                        + "[WINDOW_IMAGE]"
-                                        + windowData.get(j).getWINDOW_IMAGE()
-                                        + "[/WINDOW_IMAGE]"
-                                        + "[/WINDOW_DATA]";
+                                final String sos_xml = "[DATA]" + final_xml
+                                        + "[/DATA]";
 
-                                final_xml = final_xml + onXML;
+                                request = new SoapObject(
+                                        CommonString.NAMESPACE,
+                                        CommonString.METHOD_UPLOAD_XML);
+                                request.addProperty("XMLDATA", sos_xml);
+                                request.addProperty("KEYS", "WINDOW_DATA");
+                                request.addProperty("USERNAME", username);
+                                request.addProperty("MID", mid);
+
+                                envelope = new SoapSerializationEnvelope(
+                                        SoapEnvelope.VER11);
+                                envelope.dotNet = true;
+                                envelope.setOutputSoapObject(request);
+
+                                androidHttpTransport = new HttpTransportSE(
+                                        CommonString.URL);
+
+                                androidHttpTransport.call(
+                                        CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
+                                        envelope);
+                                result = (Object) envelope.getResponse();
+
+
+                                if (!result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_SUCCESS)) {
+
+                                    return "WINDOW_DATA";
+                                }
+
+
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_NO_DATA)) {
+                                    return CommonString.METHOD_UPLOAD_XML;
+                                }
+
+                                if (result.toString().equalsIgnoreCase(
+                                        CommonString.KEY_FAILURE)) {
+                                    return CommonString.METHOD_UPLOAD_XML;
+                                }
 
                             }
+                            data.value = 80;
+                            data.name = "WINDOW_DATA";
 
-                            final String sos_xml = "[DATA]" + final_xml
-                                    + "[/DATA]";
+                            publishProgress(data);
 
-                            request = new SoapObject(
-                                    CommonString.NAMESPACE,
-                                    CommonString.METHOD_UPLOAD_XML);
-                            request.addProperty("XMLDATA", sos_xml);
-                            request.addProperty("KEYS", "WINDOW_DATA");
-                            request.addProperty("USERNAME", username);
-                            request.addProperty("MID", mid);
+                            final_xml = "";
+                            onXML = "";
+                            //SET CHILD DATA
+                            if (windowData.size() > 0) {
+                                for (int j = 0; j < windowData.size(); j++) {
+                                    window_Child_Data = database.getAnswerListForSavedWindowData(windowData.get(j).getKey_id());
 
-                            envelope = new SoapSerializationEnvelope(
-                                    SoapEnvelope.VER11);
-                            envelope.dotNet = true;
-                            envelope.setOutputSoapObject(request);
+                                    if (window_Child_Data.size() > 0) {
+                                        for (int k = 0; k < window_Child_Data.size(); k++) {
 
-                            androidHttpTransport = new HttpTransportSE(
-                                    CommonString.URL);
+                                            onXML = "[WINDOW_CHILD_DATA][MID]"
+                                                    + mid
+                                                    + "[/MID]"
+                                                    + "[CREATED_BY]"
+                                                    + username
+                                                    + "[/CREATED_BY]"
+                                                    + "[COMMON_ID]"
+                                                    + windowData.get(j).getKey_id()
+                                                    + "[/COMMON_ID]"
+                                                    + "[WINDOW_CD]"
+                                                    + window_Child_Data.get(k).getWINDOW_CD().get(0)
+                                                    + "[/WINDOW_CD]"
+                                                    + "[CHECKLIST_CD]"
+                                                    + window_Child_Data.get(k).getCHECKLIST_CD().get(0)
+                                                    + "[/CHECKLIST_CD]"
+                                                    + "[ANSWER_CD]"
+                                                    + window_Child_Data.get(k).getANSWER_CD()
+                                                    + "[/ANSWER_CD]"
+                                                    + "[/WINDOW_CHILD_DATA]";
 
-                            androidHttpTransport.call(
-                                    CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
-                                    envelope);
-                            result = (Object) envelope.getResponse();
+                                            final_xml = final_xml + onXML;
+                                        }
 
 
-                            if (!result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_SUCCESS)) {
+                                        final String sos_xml = "[DATA]" + final_xml
+                                                + "[/DATA]";
 
-                                return "WINDOW_DATA";
-                            }
+                                        request = new SoapObject(
+                                                CommonString.NAMESPACE,
+                                                CommonString.METHOD_UPLOAD_XML);
+                                        request.addProperty("XMLDATA", sos_xml);
+                                        request.addProperty("KEYS", "WINDOW_CHILD_DATA");
+                                        request.addProperty("USERNAME", username);
+                                        request.addProperty("MID", mid);
+
+                                        envelope = new SoapSerializationEnvelope(
+                                                SoapEnvelope.VER11);
+                                        envelope.dotNet = true;
+                                        envelope.setOutputSoapObject(request);
+
+                                        androidHttpTransport = new HttpTransportSE(
+                                                CommonString.URL);
+
+                                        androidHttpTransport.call(
+                                                CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
+                                                envelope);
+
+                                        result = (Object) envelope.getResponse();
 
 
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_NO_DATA)) {
-                                return CommonString.METHOD_UPLOAD_XML;
-                            }
+                                        if (!result.toString().equalsIgnoreCase(
+                                                CommonString.KEY_SUCCESS)) {
 
-                            if (result.toString().equalsIgnoreCase(
-                                    CommonString.KEY_FAILURE)) {
-                                return CommonString.METHOD_UPLOAD_XML;
-                            }
+                                            return "WINDOW_CHILD_DATA";
+                                        }
 
-                        }
-                        data.value = 80;
-                        data.name = "WINDOW_DATA";
 
-                        publishProgress(data);
+                                        if (result.toString().equalsIgnoreCase(
+                                                CommonString.KEY_NO_DATA)) {
+                                            return CommonString.METHOD_UPLOAD_XML;
+                                        }
 
-                        final_xml = "";
-                        onXML = "";
-                        //SET CHILD DATA
-                        if (windowData.size() > 0) {
-                            for (int j = 0; j < windowData.size(); j++) {
-                                window_Child_Data = database.getAnswerListForSavedWindowData(windowData.get(j).getKey_id());
+                                        if (result.toString().equalsIgnoreCase(
+                                                CommonString.KEY_FAILURE)) {
+                                            return CommonString.METHOD_UPLOAD_XML;
+                                        }
 
-                                if (window_Child_Data.size() > 0) {
-                                    for (int k = 0; k < window_Child_Data.size(); k++) {
-
-                                        onXML = "[WINDOW_CHILD_DATA][MID]"
-                                                + mid
-                                                + "[/MID]"
-                                                + "[CREATED_BY]"
-                                                + username
-                                                + "[/CREATED_BY]"
-                                                + "[COMMON_ID]"
-                                                + windowData.get(j).getKey_id()
-                                                + "[/COMMON_ID]"
-                                                + "[WINDOW_CD]"
-                                                + window_Child_Data.get(k).getWINDOW_CD().get(0)
-                                                + "[/WINDOW_CD]"
-                                                + "[CHECKLIST_CD]"
-                                                + window_Child_Data.get(k).getCHECKLIST_CD().get(0)
-                                                + "[/CHECKLIST_CD]"
-                                                + "[ANSWER_CD]"
-                                                + window_Child_Data.get(k).getANSWER_CD()
-                                                + "[/ANSWER_CD]"
-                                                + "[/WINDOW_CHILD_DATA]";
-
-                                        final_xml = final_xml + onXML;
                                     }
-
-
-                                    final String sos_xml = "[DATA]" + final_xml
-                                            + "[/DATA]";
-
-                                    request = new SoapObject(
-                                            CommonString.NAMESPACE,
-                                            CommonString.METHOD_UPLOAD_XML);
-                                    request.addProperty("XMLDATA", sos_xml);
-                                    request.addProperty("KEYS", "WINDOW_CHILD_DATA");
-                                    request.addProperty("USERNAME", username);
-                                    request.addProperty("MID", mid);
-
-                                    envelope = new SoapSerializationEnvelope(
-                                            SoapEnvelope.VER11);
-                                    envelope.dotNet = true;
-                                    envelope.setOutputSoapObject(request);
-
-                                    androidHttpTransport = new HttpTransportSE(
-                                            CommonString.URL);
-
-                                    androidHttpTransport.call(
-                                            CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
-                                            envelope);
-
-                                    result = (Object) envelope.getResponse();
-
-
-                                    if (!result.toString().equalsIgnoreCase(
-                                            CommonString.KEY_SUCCESS)) {
-
-                                        return "WINDOW_CHILD_DATA";
-                                    }
-
-
-                                    if (result.toString().equalsIgnoreCase(
-                                            CommonString.KEY_NO_DATA)) {
-                                        return CommonString.METHOD_UPLOAD_XML;
-                                    }
-
-                                    if (result.toString().equalsIgnoreCase(
-                                            CommonString.KEY_FAILURE)) {
-                                        return CommonString.METHOD_UPLOAD_XML;
-                                    }
+                                    publishProgress(data);
 
                                 }
-                                publishProgress(data);
-
                             }
                         }
 
@@ -591,21 +596,17 @@ public class UploadDataActivity extends AppCompatActivity {
                         if (coverageBeanlist.get(i).getImage() != null && !coverageBeanlist.get(i).getImage().equals("")) {
 
                             if (new File(CommonString.FILE_PATH + coverageBeanlist.get(i).getImage()).exists()) {
-                                result = UploadImage(coverageBeanlist.get(i).getImage(), "StoreImages");
-                                if (!result
-                                        .toString()
-                                        .equalsIgnoreCase(
-                                                CommonString.KEY_SUCCESS)) {
-                                    return "StoreImages";
-                                } else if (result
-                                        .toString()
-                                        .equalsIgnoreCase(
-                                                CommonString.KEY_FALSE)) {
-                                    return "StoreImages";
-                                } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                //  result = UploadImage(coverageBeanlist.get(i).getImage(), "StoreImages");
+                                result = uploadRetro.UploadImage2(coverageBeanlist.get(i).getImage(), "StoreImages", CommonString.FILE_PATH);
 
-                                    return "StoreImages"
-                                            + "," + errormsg;
+                                if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                    if (result.toString().equalsIgnoreCase(CommonString.KEY_FALSE)) {
+                                        return "StoreImages";
+                                    } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                        return "StoreImages" + "," + errormsg;
+                                    } else if (result.toString().equalsIgnoreCase(CommonString.MESSAGE_SOCKETEXCEPTION)) {
+                                        throw new IOException();
+                                    }
                                 }
 
                                 runOnUiThread(new Runnable() {
@@ -630,23 +631,18 @@ public class UploadDataActivity extends AppCompatActivity {
 
                                     if (new File(CommonString.FILE_PATH + PosmEntryData.get(j).getImage()).exists()) {
 
-                                        result = UploadImage(PosmEntryData.get(j).getImage(), "POSMImages");
-                                        if (!result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_SUCCESS)) {
-                                            return "POSMImages";
-                                        } else if (result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_FALSE)) {
-
-                                            return "POSMImages";
-                                        } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
-
-                                            return "POSMImages"
-                                                    + "," + errormsg;
+                                        // result = UploadImage(PosmEntryData.get(j).getImage(), "POSMImages");
+                                        result = uploadRetro.UploadImage2(PosmEntryData.get(j).getImage(), "POSMImages", CommonString.FILE_PATH);
+                                        if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                            if (result.toString().equalsIgnoreCase(CommonString.KEY_FALSE)) {
+                                                return "POSMImages";
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                                return "POSMImages" + "," + errormsg;
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.MESSAGE_SOCKETEXCEPTION)) {
+                                                throw new IOException();
+                                            }
                                         }
+
 
                                         runOnUiThread(new Runnable() {
 
@@ -676,24 +672,17 @@ public class UploadDataActivity extends AppCompatActivity {
 
                                     if (new File(CommonString.FILE_PATH + windowData.get(j).getWINDOW_IMAGE()).exists()) {
 
-                                        result = UploadImage(windowData.get(j).getWINDOW_IMAGE(), "WindowImages");
+                                        // result = UploadImage(windowData.get(j).getWINDOW_IMAGE(), "WindowImages");
+                                        result = uploadRetro.UploadImage2(windowData.get(j).getWINDOW_IMAGE(), "WindowImages", CommonString.FILE_PATH);
 
-                                        if (!result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_SUCCESS)) {
-
-                                            return "WindowImages";
-                                        } else if (result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_FALSE)) {
-
-                                            return "WindowImages";
-                                        } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
-
-                                            return "WindowImages"
-                                                    + "," + errormsg;
+                                        if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                            if (result.toString().equalsIgnoreCase(CommonString.KEY_FALSE)) {
+                                                return "WindowImages";
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                                return "WindowImages" + "," + errormsg;
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.MESSAGE_SOCKETEXCEPTION)) {
+                                                throw new IOException();
+                                            }
                                         }
 
                                         runOnUiThread(new Runnable() {
@@ -787,7 +776,8 @@ public class UploadDataActivity extends AppCompatActivity {
                     if (!coverageBeanlist_addstore.get(i).getStatus()
                             .equalsIgnoreCase(CommonString.KEY_U)) {
 
-                        String onXML; /*= "[USER_DATA][STORE_CD]"
+                        if (!coverageBeanlist_addstore.get(i).getStatus().equalsIgnoreCase(CommonString.KEY_D)) {
+                            String onXML; /*= "[USER_DATA][STORE_CD]"
                                 + coverageBeanlist_addstore.get(i).getStoreId()
                                 + "[/STORE_CD]" + "[VISIT_DATE]"
                                 + coverageBeanlist_addstore.get(i).getVisitDate()
@@ -815,89 +805,89 @@ public class UploadDataActivity extends AppCompatActivity {
                         Final_large_xml = onXML;*/
 
 
-                        //  mid = Integer.parseInt((words[1]));
-                        mid = 0;
-                        data.value = 10;
-                        data.name = "Uploading";
+                            //  mid = Integer.parseInt((words[1]));
+                            mid = 0;
+                            data.value = 10;
+                            data.name = "Uploading";
 
-                        publishProgress(data);
+                            publishProgress(data);
 
-                        ///////ADD NEW STORE DATA
-                        String final_xml = "";
-                        onXML = "";
-                        addNewStoreList = database.getAddNewStoreListForUpload(String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
+                            ///////ADD NEW STORE DATA
+                            String final_xml = "";
+                            onXML = "";
+                            addNewStoreList = database.getAddNewStoreListForUpload(String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
 
-                        if (addNewStoreList.size() > 0) {
-                            for (int j = 0; j < addNewStoreList.size(); j++) {
+                            if (addNewStoreList.size() > 0) {
+                                for (int j = 0; j < addNewStoreList.size(); j++) {
 
 
-                                String DOB[] = addNewStoreList.get(j).getDob().split("-");
-                                String DOA[] = addNewStoreList.get(j).getDoa().split("-");
+                                    String DOB[] = addNewStoreList.get(j).getDob().split("-");
+                                    String DOA[] = addNewStoreList.get(j).getDoa().split("-");
 
-                                onXML = "[ADDNEW_STORE_DATA][MID]"
-                                        + mid
-                                        + "[/MID]"
-                                        + "[CREATED_BY]"
-                                        + username
-                                        + "[/CREATED_BY]"
-                                        + "[COVERAGE_ID]"
-                                        + coverageBeanlist_addstore.get(i).getMID()
-                                        + "[/COVERAGE_ID]"
-                                        + "[STORE_CD]"
-                                        + addNewStoreList.get(j).getStore_id()
-                                        + "[/STORE_CD]" +
+                                    onXML = "[ADDNEW_STORE_DATA][MID]"
+                                            + mid
+                                            + "[/MID]"
+                                            + "[CREATED_BY]"
+                                            + username
+                                            + "[/CREATED_BY]"
+                                            + "[COVERAGE_ID]"
+                                            + coverageBeanlist_addstore.get(i).getMID()
+                                            + "[/COVERAGE_ID]"
+                                            + "[STORE_CD]"
+                                            + addNewStoreList.get(j).getStore_id()
+                                            + "[/STORE_CD]" +
 
-                                        "[VISIT_DATE]"
-                                        + coverageBeanlist_addstore.get(i).getVisitDate()
-                                        + "[/VISIT_DATE][LATITUDE]"
-                                        + coverageBeanlist_addstore.get(i).getLatitude()
-                                        + "[/LATITUDE][APP_VERSION]"
-                                        + app_ver
-                                        + "[/APP_VERSION][LONGITUDE]"
-                                        + coverageBeanlist_addstore.get(i).getLongitude()
-                                        + "[/LONGITUDE][IN_TIME]"
-                                        + coverageBeanlist_addstore.get(i).getInTime()
-                                        + "[/IN_TIME][OUT_TIME]"
-                                        + coverageBeanlist_addstore.get(i).getOutTime()
-                                        + "[/OUT_TIME][UPLOAD_STATUS]"
-                                        + "N"
-                                        + "[/UPLOAD_STATUS][USER_ID]" + username
-                                        + "[/USER_ID][IMAGE_URL]" + coverageBeanlist_addstore.get(i).getImage()
-                                        + "[/IMAGE_URL][STORE_NAME]"
-                                        + addNewStoreList.get(j).getEd_StoreName()
-                                        + "[/STORE_NAME]"
+                                            "[VISIT_DATE]"
+                                            + coverageBeanlist_addstore.get(i).getVisitDate()
+                                            + "[/VISIT_DATE][LATITUDE]"
+                                            + coverageBeanlist_addstore.get(i).getLatitude()
+                                            + "[/LATITUDE][APP_VERSION]"
+                                            + app_ver
+                                            + "[/APP_VERSION][LONGITUDE]"
+                                            + coverageBeanlist_addstore.get(i).getLongitude()
+                                            + "[/LONGITUDE][IN_TIME]"
+                                            + coverageBeanlist_addstore.get(i).getInTime()
+                                            + "[/IN_TIME][OUT_TIME]"
+                                            + coverageBeanlist_addstore.get(i).getOutTime()
+                                            + "[/OUT_TIME][UPLOAD_STATUS]"
+                                            + "N"
+                                            + "[/UPLOAD_STATUS][USER_ID]" + username
+                                            + "[/USER_ID][IMAGE_URL]" + coverageBeanlist_addstore.get(i).getImage()
+                                            + "[/IMAGE_URL][STORE_NAME]"
+                                            + addNewStoreList.get(j).getEd_StoreName()
+                                            + "[/STORE_NAME]"
 
-                                        + "[ADDRESS]"
-                                        + addNewStoreList.get(j).getEd_Address()
-                                        + "[/ADDRESS]"
+                                            + "[ADDRESS]"
+                                            + addNewStoreList.get(j).getEd_Address()
+                                            + "[/ADDRESS]"
 
-                                        + "[PHONE]"
-                                        + addNewStoreList.get(j).getEd_Phone()
-                                        + "[/PHONE]"
+                                            + "[PHONE]"
+                                            + addNewStoreList.get(j).getEd_Phone()
+                                            + "[/PHONE]"
 
-                                        + "[CITY_CD]"
-                                        + addNewStoreList.get(j).getCity_CD()
-                                        + "[/CITY_CD]"
+                                            + "[CITY_CD]"
+                                            + addNewStoreList.get(j).getCity_CD()
+                                            + "[/CITY_CD]"
 
-                                        + "[USR_CD]"
-                                        + addNewStoreList.get(j).getUsr_cd()
-                                        + "[/USR_CD]"
+                                            + "[USR_CD]"
+                                            + addNewStoreList.get(j).getUsr_cd()
+                                            + "[/USR_CD]"
 
-                                        + "[TOWN_CD]"
-                                        + addNewStoreList.get(j).getTown_CD()
-                                        + "[/TOWN_CD]"
+                                            + "[TOWN_CD]"
+                                            + addNewStoreList.get(j).getTown_CD()
+                                            + "[/TOWN_CD]"
 
-                                        + "[STATE_CD]"
-                                        + addNewStoreList.get(j).getState_cd()
-                                        + "[/STATE_CD]"
+                                            + "[STATE_CD]"
+                                            + addNewStoreList.get(j).getState_cd()
+                                            + "[/STATE_CD]"
 
-                                        + "[RETAILER_NAME]"
-                                        + addNewStoreList.get(j).getEd_RetailerName()
-                                        + "[/RETAILER_NAME]"
+                                            + "[RETAILER_NAME]"
+                                            + addNewStoreList.get(j).getEd_RetailerName()
+                                            + "[/RETAILER_NAME]"
 
-                                        + "[LANDMARK]"
-                                        + addNewStoreList.get(j).getEd_Landmark()
-                                        + "[/LANDMARK]"
+                                            + "[LANDMARK]"
+                                            + addNewStoreList.get(j).getEd_Landmark()
+                                            + "[/LANDMARK]"
 
                                       /*  + "[DOB]"
                                         + addNewStoreList.get(j).getDob()
@@ -908,154 +898,56 @@ public class UploadDataActivity extends AppCompatActivity {
                                         + "[/DOA]"
 */
 
-                                        + "[DOB_DATE]"
-                                        + DOB[0]
-                                        + "[/DOB_DATE]"
+                                            + "[DOB_DATE]"
+                                            + DOB[0]
+                                            + "[/DOB_DATE]"
 
-                                        + "[DOB_MONTH]"
-                                        + DOB[1]
-                                        + "[/DOB_MONTH]"
+                                            + "[DOB_MONTH]"
+                                            + DOB[1]
+                                            + "[/DOB_MONTH]"
 
-                                        + "[DOA_DATE]"
-                                        + DOA[0]
-                                        + "[/DOA_DATE]"
+                                            + "[DOA_DATE]"
+                                            + DOA[0]
+                                            + "[/DOA_DATE]"
 
-                                        + "[DOA_MONTH]"
-                                        + DOA[1]
-                                        + "[/DOA_MONTH]"
+                                            + "[DOA_MONTH]"
+                                            + DOA[1]
+                                            + "[/DOA_MONTH]"
 
 
-                                        + "[RETAILER_HAS_SMARTPHONE]"
-                                        + addNewStoreList.get(j).getHasSmartphone()
-                                        + "[/RETAILER_HAS_SMARTPHONE]"
+                                            + "[RETAILER_HAS_SMARTPHONE]"
+                                            + addNewStoreList.get(j).getHasSmartphone()
+                                            + "[/RETAILER_HAS_SMARTPHONE]"
 
-                                        + "[CHANNEL_CD]"
-                                        + addNewStoreList.get(j).getStoreType_CD()
-                                        + "[/CHANNEL_CD]"
+                                            + "[CHANNEL_CD]"
+                                            + addNewStoreList.get(j).getStoreType_CD()
+                                            + "[/CHANNEL_CD]"
 
-                                        + "[IMAGE]"
-                                        + addNewStoreList.get(j).getImg_Camera()
-                                        + "[/IMAGE]"
+                                            + "[IMAGE]"
+                                            + addNewStoreList.get(j).getImg_Camera()
+                                            + "[/IMAGE]"
 
-                                        + "[/ADDNEW_STORE_DATA]";
+                                            + "[/ADDNEW_STORE_DATA]";
 
-                                final_xml = final_xml + onXML;
+                                    final_xml = final_xml + onXML;
+
+                                }
+
+                                Final_large_xml = Final_large_xml + final_xml;
 
                             }
-
-                            Final_large_xml = Final_large_xml + final_xml;
-
-                        }
 
 
 ///////window1 DATA
-                        final_xml = "";
-                        onXML = "";
-                        lineEntry = database.getLineEntryData(coverageBeanlist_addstore.get(i).getStoreId(), String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
+                            final_xml = "";
+                            onXML = "";
+                            lineEntry = database.getLineEntryData(coverageBeanlist_addstore.get(i).getStoreId(), String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
 
-                        if (lineEntry.size() > 0) {
+                            if (lineEntry.size() > 0) {
 
-                            for (int j = 0; j < lineEntry.size(); j++) {
+                                for (int j = 0; j < lineEntry.size(); j++) {
 
-                                onXML = "[LINE_ENTRY_DATA][MID]"
-                                        + mid
-                                        + "[/MID]"
-                                        + "[CREATED_BY]"
-                                        + username
-                                        + "[/CREATED_BY]"
-                                        + "[COVERAGE_ID]"
-                                        + coverageBeanlist_addstore.get(i).getMID()
-                                        + "[/COVERAGE_ID]"
-                                        + "[TOTAL_LINE_AVAILABLE]"
-                                        + lineEntry.get(j).getTotalLineAvailable()
-                                        + "[/TOTAL_LINE_AVAILABLE]"
-                                        + "[NO_OF_SKULINE]"
-                                        + lineEntry.get(j).getNoOfBuildSkuLine()
-                                        + "[/NO_OF_SKULINE]"
-                                        + "[TOTAL_BILL_AMOUNT]"
-                                        + lineEntry.get(j).getTotalBillAmount()
-                                        + "[/TOTAL_BILL_AMOUNT]"
-                                        + "[/LINE_ENTRY_DATA]";
-
-
-                                final_xml = final_xml + onXML;
-
-                            }
-
-                            Final_large_xml = Final_large_xml + final_xml;
-
-                        }
-
-
-                        data.value = 80;
-                        data.name = "LINE_ENTRY_DATA_LEAP_FROG";
-
-                        publishProgress(data);
-
-
-///////PosmEntry DATA
-                        final_xml = "";
-                        onXML = "";
-                        PosmEntryData = database.getPosmEntryData(coverageBeanlist_addstore.get(i).getStoreId(), String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
-
-                        if (PosmEntryData.size() > 0) {
-
-                            for (int j = 0; j < PosmEntryData.size(); j++) {
-
-                                onXML = "[POSM_ENTRY_DATA][MID]"
-                                        + mid
-                                        + "[/MID]"
-                                        + "[CREATED_BY]"
-                                        + username
-                                        + "[/CREATED_BY]"
-                                        + "[COVERAGE_ID]"
-                                        + coverageBeanlist_addstore.get(i).getMID()
-                                        + "[/COVERAGE_ID]"
-                                        + "[BRAND_CD]"
-                                        + PosmEntryData.get(j).getBrand_cd()
-                                        + "[/BRAND_CD]"
-                                        + "[POSM_CD]"
-                                        + PosmEntryData.get(j).getPosm_cd()
-                                        + "[/POSM_CD]"
-                                        + "[QUANTITY]"
-                                        + PosmEntryData.get(j).getQuantity()
-                                        + "[/QUANTITY]"
-                                        + "[IMAGE]"
-                                        + PosmEntryData.get(j).getImage()
-                                        + "[/IMAGE]"
-                                        + "[/POSM_ENTRY_DATA]";
-
-                                final_xml = final_xml + onXML;
-
-                            }
-                            final_xml = "[POSM]" + final_xml + "[/POSM]";
-
-                            Final_large_xml = Final_large_xml + final_xml;
-                        }
-
-                        data.value = 80;
-                        data.name = "POSM_ENTRY_DATA_LEAP_FROG";
-
-                        publishProgress(data);
-
-// window data
-
-                        final_xml = "";
-                        onXML = "";
-                        windowData = database.getSavedWindowData(coverageBeanlist_addstore.get(i).getStoreId(), String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
-
-                        if (windowData.size() > 0) {
-
-                            for (int j = 0; j < windowData.size(); j++) {
-
-                                String isExist = "";
-                                if (windowData.get(j).isWINDOW_EXIST()) {
-                                    isExist = "1";
-                                } else {
-                                    isExist = "0";
-                                }
-                                if (windowData.get(j).isWINDOW_EXIST()) {
-                                    onXML = "[WINDOW_DATA][MID]"
+                                    onXML = "[LINE_ENTRY_DATA][MID]"
                                             + mid
                                             + "[/MID]"
                                             + "[CREATED_BY]"
@@ -1064,34 +956,132 @@ public class UploadDataActivity extends AppCompatActivity {
                                             + "[COVERAGE_ID]"
                                             + coverageBeanlist_addstore.get(i).getMID()
                                             + "[/COVERAGE_ID]"
-                                            + "[KEY_ID]"
-                                            + windowData.get(j).getKey_id()
-                                            + "[/KEY_ID]"
-                                            + "[WINDOW_CD]"
-                                            + windowData.get(j).getWINDOW_CD().get(0)
-                                            + "[/WINDOW_CD]"
-                                            + "[WINDOW_EXISTS]"
-                                            + isExist
-                                            + "[/WINDOW_EXISTS]"
-                                            + "[WINDOW_IMAGE]"
-                                            + windowData.get(j).getWINDOW_IMAGE()
-                                            + "[/WINDOW_IMAGE]"
-                                            + "[/WINDOW_DATA]";
+                                            + "[TOTAL_LINE_AVAILABLE]"
+                                            + lineEntry.get(j).getTotalLineAvailable()
+                                            + "[/TOTAL_LINE_AVAILABLE]"
+                                            + "[NO_OF_SKULINE]"
+                                            + lineEntry.get(j).getNoOfBuildSkuLine()
+                                            + "[/NO_OF_SKULINE]"
+                                            + "[TOTAL_BILL_AMOUNT]"
+                                            + lineEntry.get(j).getTotalBillAmount()
+                                            + "[/TOTAL_BILL_AMOUNT]"
+                                            + "[/LINE_ENTRY_DATA]";
+
 
                                     final_xml = final_xml + onXML;
+
                                 }
+
+                                Final_large_xml = Final_large_xml + final_xml;
 
                             }
 
-                            final String sos_xml = "[WINDOW]" + final_xml
-                                    + "[/WINDOW]";
-                            Final_large_xml = Final_large_xml + sos_xml;
 
-                        }
-                        data.value = 80;
-                        data.name = "WINDOW_DATA_LEAP_FROG";
+                            data.value = 80;
+                            data.name = "LINE_ENTRY_DATA_LEAP_FROG";
 
-                        publishProgress(data);
+                            publishProgress(data);
+
+
+///////PosmEntry DATA
+                            final_xml = "";
+                            onXML = "";
+                            PosmEntryData = database.getPosmEntryData(coverageBeanlist_addstore.get(i).getStoreId(), String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
+
+                            if (PosmEntryData.size() > 0) {
+
+                                for (int j = 0; j < PosmEntryData.size(); j++) {
+
+                                    onXML = "[POSM_ENTRY_DATA][MID]"
+                                            + mid
+                                            + "[/MID]"
+                                            + "[CREATED_BY]"
+                                            + username
+                                            + "[/CREATED_BY]"
+                                            + "[COVERAGE_ID]"
+                                            + coverageBeanlist_addstore.get(i).getMID()
+                                            + "[/COVERAGE_ID]"
+                                            + "[BRAND_CD]"
+                                            + PosmEntryData.get(j).getBrand_cd()
+                                            + "[/BRAND_CD]"
+                                            + "[POSM_CD]"
+                                            + PosmEntryData.get(j).getPosm_cd()
+                                            + "[/POSM_CD]"
+                                            + "[QUANTITY]"
+                                            + PosmEntryData.get(j).getQuantity()
+                                            + "[/QUANTITY]"
+                                            + "[IMAGE]"
+                                            + PosmEntryData.get(j).getImage()
+                                            + "[/IMAGE]"
+                                            + "[/POSM_ENTRY_DATA]";
+
+                                    final_xml = final_xml + onXML;
+
+                                }
+                                final_xml = "[POSM]" + final_xml + "[/POSM]";
+
+                                Final_large_xml = Final_large_xml + final_xml;
+                            }
+
+                            data.value = 80;
+                            data.name = "POSM_ENTRY_DATA_LEAP_FROG";
+
+                            publishProgress(data);
+
+// window data
+
+                            final_xml = "";
+                            onXML = "";
+                            windowData = database.getSavedWindowData(coverageBeanlist_addstore.get(i).getStoreId(), String.valueOf(coverageBeanlist_addstore.get(i).getMID()));
+
+                            if (windowData.size() > 0) {
+
+                                for (int j = 0; j < windowData.size(); j++) {
+
+                                    String isExist = "";
+                                    if (windowData.get(j).isWINDOW_EXIST()) {
+                                        isExist = "1";
+                                    } else {
+                                        isExist = "0";
+                                    }
+                                    if (windowData.get(j).isWINDOW_EXIST()) {
+                                        onXML = "[WINDOW_DATA][MID]"
+                                                + mid
+                                                + "[/MID]"
+                                                + "[CREATED_BY]"
+                                                + username
+                                                + "[/CREATED_BY]"
+                                                + "[COVERAGE_ID]"
+                                                + coverageBeanlist_addstore.get(i).getMID()
+                                                + "[/COVERAGE_ID]"
+                                                + "[KEY_ID]"
+                                                + windowData.get(j).getKey_id()
+                                                + "[/KEY_ID]"
+                                                + "[WINDOW_CD]"
+                                                + windowData.get(j).getWINDOW_CD().get(0)
+                                                + "[/WINDOW_CD]"
+                                                + "[WINDOW_EXISTS]"
+                                                + isExist
+                                                + "[/WINDOW_EXISTS]"
+                                                + "[WINDOW_IMAGE]"
+                                                + windowData.get(j).getWINDOW_IMAGE()
+                                                + "[/WINDOW_IMAGE]"
+                                                + "[/WINDOW_DATA]";
+
+                                        final_xml = final_xml + onXML;
+                                    }
+
+                                }
+
+                                final String sos_xml = "[WINDOW]" + final_xml
+                                        + "[/WINDOW]";
+                                Final_large_xml = Final_large_xml + sos_xml;
+
+                            }
+                            data.value = 80;
+                            data.name = "WINDOW_DATA_LEAP_FROG";
+
+                            publishProgress(data);
 
                         /*final_xml = "";
                         onXML = "";
@@ -1142,95 +1132,97 @@ public class UploadDataActivity extends AppCompatActivity {
                         }*/
 
 
-                        final_xml = "";
-                        onXML = "";
-                        //SET CHILD DATA
-                        if (windowData.size() > 0) {
+                            final_xml = "";
+                            onXML = "";
+                            //SET CHILD DATA
+                            if (windowData.size() > 0) {
 
-                            String windowXml = "";
-                            for (int j = 0; j < windowData.size(); j++) {
+                                String windowXml = "";
+                                for (int j = 0; j < windowData.size(); j++) {
 
-                                if (windowData.get(j).isWINDOW_EXIST()) {
+                                    if (windowData.get(j).isWINDOW_EXIST()) {
 
-                                    window_Child_Data = database.getAnswerListForSavedWindowData(windowData.get(j).getKey_id());
-                                    String sos_xml = "";
+                                        window_Child_Data = database.getAnswerListForSavedWindowData(windowData.get(j).getKey_id());
+                                        String sos_xml = "";
 
-                                    if (window_Child_Data.size() > 0) {
-                                        for (int k = 0; k < window_Child_Data.size(); k++) {
+                                        if (window_Child_Data.size() > 0) {
+                                            for (int k = 0; k < window_Child_Data.size(); k++) {
 
-                                            String onXML1 = "[WINDOW_CHILD_DATA][MID]" + mid + "[/MID]" +
-                                                    "[CREATED_BY]" + username + "[/CREATED_BY]"
-                                                    + "[COVERAGE_ID]"
-                                                    + coverageBeanlist_addstore.get(i).getMID()
-                                                    + "[/COVERAGE_ID]"
-                                                    + "[COMMON_ID]"
-                                                    + windowData.get(j).getKey_id()
-                                                    + "[/COMMON_ID]"
-                                                    + "[WINDOW_CD]"
-                                                    + window_Child_Data.get(k).getWINDOW_CD().get(0)
-                                                    + "[/WINDOW_CD]"
-                                                    + "[CHECKLIST_CD]"
-                                                    + window_Child_Data.get(k).getCHECKLIST_CD().get(0)
-                                                    + "[/CHECKLIST_CD]"
-                                                    + "[ANSWER_CD]"
-                                                    + window_Child_Data.get(k).getANSWER_CD()
-                                                    + "[/ANSWER_CD]"
-                                                    + "[/WINDOW_CHILD_DATA]";
+                                                String onXML1 = "[WINDOW_CHILD_DATA][MID]" + mid + "[/MID]" +
+                                                        "[CREATED_BY]" + username + "[/CREATED_BY]"
+                                                        + "[COVERAGE_ID]"
+                                                        + coverageBeanlist_addstore.get(i).getMID()
+                                                        + "[/COVERAGE_ID]"
+                                                        + "[COMMON_ID]"
+                                                        + windowData.get(j).getKey_id()
+                                                        + "[/COMMON_ID]"
+                                                        + "[WINDOW_CD]"
+                                                        + window_Child_Data.get(k).getWINDOW_CD().get(0)
+                                                        + "[/WINDOW_CD]"
+                                                        + "[CHECKLIST_CD]"
+                                                        + window_Child_Data.get(k).getCHECKLIST_CD().get(0)
+                                                        + "[/CHECKLIST_CD]"
+                                                        + "[ANSWER_CD]"
+                                                        + window_Child_Data.get(k).getANSWER_CD()
+                                                        + "[/ANSWER_CD]"
+                                                        + "[/WINDOW_CHILD_DATA]";
 
-                                            sos_xml = sos_xml + onXML1;
+                                                sos_xml = sos_xml + onXML1;
+                                            }
+
                                         }
+                                        windowXml = windowXml + sos_xml;
 
                                     }
-                                    windowXml = windowXml + sos_xml;
-
                                 }
+
+                                final_xml = "[WINDOW_CHILD]" + windowXml + "[/WINDOW_CHILD]";
+                            }
+                            Final_large_xml = Final_large_xml + final_xml;
+
+                            String LEAP_FROG_DATA = "[LEAP_FROG_DATA]" + Final_large_xml + "[/LEAP_FROG_DATA]";
+                            SoapObject request = new SoapObject(
+                                    CommonString.NAMESPACE,
+                                    CommonString.METHOD_UPLOAD_XML);
+                            request.addProperty("XMLDATA", LEAP_FROG_DATA);
+                            request.addProperty("KEYS", "LEAP_FROG_DATA");
+                            request.addProperty("USERNAME", username);
+                            request.addProperty("MID", mid);
+
+                            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
+                                    SoapEnvelope.VER11);
+                            envelope.dotNet = true;
+                            envelope.setOutputSoapObject(request);
+
+                            HttpTransportSE androidHttpTransport = new HttpTransportSE(
+                                    CommonString.URL);
+
+                            androidHttpTransport.call(
+                                    CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
+                                    envelope);
+                            Object result = (Object) envelope.getResponse();
+
+                            if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                return "LEAP_FROG_DATA";
+                            }
+                            if (result.toString().equalsIgnoreCase(CommonString.KEY_NO_DATA)) {
+                                return CommonString.METHOD_UPLOAD_XML;
+                            }
+                            if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                return CommonString.METHOD_UPLOAD_XML;
                             }
 
-                            final_xml = "[WINDOW_CHILD]" + windowXml + "[/WINDOW_CHILD]";
+                            if (result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                database.open();
+                                database.updateCoverageStatus(coverageBeanlist_addstore.get(i)
+                                        .getMID(), CommonString.KEY_D);
+                                database.updateStoreStatusOnStoreinfo(coverageBeanlist_addstore.get(i)
+                                        .getMID(), CommonString.KEY_D);
+                            }
+
+
+                            publishProgress(data);
                         }
-                        Final_large_xml = Final_large_xml + final_xml;
-
-                        String LEAP_FROG_DATA = "[LEAP_FROG_DATA]" + Final_large_xml + "[/LEAP_FROG_DATA]";
-                        SoapObject request = new SoapObject(
-                                CommonString.NAMESPACE,
-                                CommonString.METHOD_UPLOAD_XML);
-                        request.addProperty("XMLDATA", LEAP_FROG_DATA);
-                        request.addProperty("KEYS", "LEAP_FROG_DATA");
-                        request.addProperty("USERNAME", username);
-                        request.addProperty("MID", mid);
-
-                        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                                SoapEnvelope.VER11);
-                        envelope.dotNet = true;
-                        envelope.setOutputSoapObject(request);
-
-                        HttpTransportSE androidHttpTransport = new HttpTransportSE(
-                                CommonString.URL);
-
-                        androidHttpTransport.call(
-                                CommonString.SOAP_ACTION + CommonString.METHOD_UPLOAD_XML,
-                                envelope);
-                        Object result = (Object) envelope.getResponse();
-
-                        if (!result.toString().equalsIgnoreCase(
-                                CommonString.KEY_SUCCESS)) {
-
-                            return "LEAP_FROG_DATA";
-                        }
-
-
-                        if (result.toString().equalsIgnoreCase(
-                                CommonString.KEY_NO_DATA)) {
-                            return CommonString.METHOD_UPLOAD_XML;
-                        }
-
-                        if (result.toString().equalsIgnoreCase(
-                                CommonString.KEY_FAILURE)) {
-                            return CommonString.METHOD_UPLOAD_XML;
-                        }
-
-
-                        publishProgress(data);
 
 
 //////////////////////////////////////
@@ -1238,21 +1230,17 @@ public class UploadDataActivity extends AppCompatActivity {
                         if (coverageBeanlist_addstore.get(i).getImage() != null && !coverageBeanlist_addstore.get(i).getImage().equals("")) {
 
                             if (new File(CommonString.FILE_PATH + coverageBeanlist_addstore.get(i).getImage()).exists()) {
-                                result = UploadImage(coverageBeanlist_addstore.get(i).getImage(), "StoreImages");
-                                if (!result
-                                        .toString()
-                                        .equalsIgnoreCase(
-                                                CommonString.KEY_SUCCESS)) {
-                                    return "StoreImages_LEAP_FROG";
-                                } else if (result
-                                        .toString()
-                                        .equalsIgnoreCase(
-                                                CommonString.KEY_FALSE)) {
-                                    return "StoreImages_LEAP_FROG";
-                                } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                //result = UploadImage(coverageBeanlist_addstore.get(i).getImage(), "StoreImages");
+                                result = uploadRetro.UploadImage2(coverageBeanlist_addstore.get(i).getImage(), "StoreImages", CommonString.FILE_PATH);
 
-                                    return "StoreImages_LEAP_FROG"
-                                            + "," + errormsg;
+                                if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                    if (result.toString().equalsIgnoreCase(CommonString.KEY_FALSE)) {
+                                        return "StoreImages_LEAP_FROG";
+                                    } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                        return "StoreImages_LEAP_FROG" + "," + errormsg;
+                                    } else if (result.toString().equalsIgnoreCase(CommonString.MESSAGE_SOCKETEXCEPTION)) {
+                                        throw new IOException();
+                                    }
                                 }
 
                                 runOnUiThread(new Runnable() {
@@ -1277,23 +1265,16 @@ public class UploadDataActivity extends AppCompatActivity {
                                 if (addNewStoreList.get(j).getImg_Camera() != null && !addNewStoreList.get(j).getImg_Camera().equals("")) {
 
                                     if (new File(CommonString.FILE_PATH + addNewStoreList.get(j).getImg_Camera()).exists()) {
-
-                                        result = UploadImage(addNewStoreList.get(j).getImg_Camera(), "StoreImages");
-                                        if (!result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_SUCCESS)) {
-                                            return "NewStoreImages_leapFrog";
-                                        } else if (result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_FALSE)) {
-
-                                            return "NewStoreImages_leapFrog";
-                                        } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
-
-                                            return "NewStoreImages_leapFrog"
-                                                    + "," + errormsg;
+                                        //result = UploadImage(addNewStoreList.get(j).getImg_Camera(), "StoreImages");
+                                        result = uploadRetro.UploadImage2(addNewStoreList.get(j).getImg_Camera(), "StoreImages", CommonString.FILE_PATH);
+                                        if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                            if (result.toString().equalsIgnoreCase(CommonString.KEY_FALSE)) {
+                                                return "NewStoreImages_leapFrog";
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                                return "NewStoreImages_leapFrog" + "," + errormsg;
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.MESSAGE_SOCKETEXCEPTION)) {
+                                                throw new IOException();
+                                            }
                                         }
 
                                         runOnUiThread(new Runnable() {
@@ -1314,29 +1295,24 @@ public class UploadDataActivity extends AppCompatActivity {
                         publishProgress(data);
 
 
-                        if (PosmEntryData.size() > 0) {
+                        if (PosmEntryData.size() > 0)
+                        {
                             for (int j = 0; j < PosmEntryData.size(); j++) {
 
                                 if (PosmEntryData.get(j).getImage() != null && !PosmEntryData.get(j).getImage().equals("")) {
 
                                     if (new File(CommonString.FILE_PATH + PosmEntryData.get(j).getImage()).exists()) {
+                                        //result = UploadImage(PosmEntryData.get(j).getImage(), "POSMImages");
+                                        result = uploadRetro.UploadImage2(PosmEntryData.get(j).getImage(), "POSMImages", CommonString.FILE_PATH);
+                                        if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                            if (result.toString().equalsIgnoreCase(CommonString.KEY_FALSE)) {
+                                                return "POSMImages_leapFrog";
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                                return "POSMImages_leapFrog" + "," + errormsg;
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.MESSAGE_SOCKETEXCEPTION)) {
+                                                throw new IOException();
+                                            }
 
-                                        result = UploadImage(PosmEntryData.get(j).getImage(), "POSMImages");
-                                        if (!result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_SUCCESS)) {
-                                            return "POSMImages_leapFrog";
-                                        } else if (result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_FALSE)) {
-
-                                            return "POSMImages_leapFrog";
-                                        } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
-
-                                            return "POSMImages_leapFrog"
-                                                    + "," + errormsg;
                                         }
 
                                         runOnUiThread(new Runnable() {
@@ -1366,25 +1342,17 @@ public class UploadDataActivity extends AppCompatActivity {
                                 if (windowData.get(j).getWINDOW_IMAGE() != null && !windowData.get(j).getWINDOW_IMAGE().equals("")) {
 
                                     if (new File(CommonString.FILE_PATH + windowData.get(j).getWINDOW_IMAGE()).exists()) {
+                                        //result = UploadImage(windowData.get(j).getWINDOW_IMAGE(), "WindowImages");
+                                        result = uploadRetro.UploadImage2(windowData.get(j).getWINDOW_IMAGE(), "WindowImages", CommonString.FILE_PATH);
 
-                                        result = UploadImage(windowData.get(j).getWINDOW_IMAGE(), "WindowImages");
-
-                                        if (!result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_SUCCESS)) {
-
-                                            return "WindowImages_leapFrog";
-                                        } else if (result
-                                                .toString()
-                                                .equalsIgnoreCase(
-                                                        CommonString.KEY_FALSE)) {
-
-                                            return "WindowImages_leapFrog";
-                                        } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
-
-                                            return "WindowImages_leapFrog"
-                                                    + "," + errormsg;
+                                        if (!result.toString().equalsIgnoreCase(CommonString.KEY_SUCCESS)) {
+                                            if (result.toString().equalsIgnoreCase(CommonString.KEY_FALSE)) {
+                                                return "WindowImages_leapFrog";
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.KEY_FAILURE)) {
+                                                return "WindowImages_leapFrog" + "," + errormsg;
+                                            } else if (result.toString().equalsIgnoreCase(CommonString.MESSAGE_SOCKETEXCEPTION)) {
+                                                throw new IOException();
+                                            }
                                         }
 
                                         runOnUiThread(new Runnable() {
@@ -1471,11 +1439,10 @@ public class UploadDataActivity extends AppCompatActivity {
                 attendanceList = database.getAttendanceList(username, visit_date);
 
                 if (attendanceList.size() > 0) {
-                    if(attendanceList.get(0).getATTENDANCE_STATUS().get(0).equalsIgnoreCase(CommonString.KEY_C))
-                    {
+                    if (attendanceList.get(0).getATTENDANCE_STATUS().get(0).equalsIgnoreCase(CommonString.KEY_C)) {
                         String onXML = "[ATTENDANCE_DATA]"
                                 + "[USER_NAME]" + username + "[/USER_NAME]"
-                                + "[REASON_CD]" + attendanceList.get(0).getATTENDANCE_STATUS().get(0) + "[/REASON_CD]"
+                                + "[REASON_CD]" + attendanceList.get(0).getReason_cd().get(0) + "[/REASON_CD]"
                                 + "[VISIT_DATE]" + visit_date + "[/VISIT_DATE]"
                                 + "[/ATTENDANCE_DATA]";
 
@@ -1579,7 +1546,7 @@ public class UploadDataActivity extends AppCompatActivity {
                 database.deleteAllTables();
 
             } else {
-                AlertAndMessages.ShowAlert1(UploadDataActivity.this, "Error in uploading " + result);
+                AlertAndMessages.ShowAlert1(UploadDataActivity.this, "Error:" + result);
             }
 
 

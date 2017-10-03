@@ -51,11 +51,11 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
     String brand_cd, posm_cd;
     Context context;
     Activity activity;
-    String store_cd, _pathforcheck = "", _path = "", image = "", flag_operation = "save",coverage_id;
+    String store_cd, _pathforcheck = "", _path = "", image = "", flag_operation = "save", coverage_id;
     int editPosition;
     private SharedPreferences preferences;
     SharedPreferences.Editor editor;
-    String state_cd, username, visit_date,storetype_cd;
+    String state_cd, username, visit_date, storetype_cd;
     ArrayList<BrandMasterGetterSetter> brandList;
     ArrayList<PosmMasterGetterSetter> posmList;
     ArrayAdapter<String> brandAdapter, posmAdapter;
@@ -75,7 +75,7 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("POSM");
 
-        brandList = db.getBrandMasterList(state_cd,storetype_cd);
+        brandList = db.getBrandMasterList(state_cd, storetype_cd);
         //------------for Brand Master List---------------
         brandAdapter = new ArrayAdapter<>(PosmEntryActivity.this, android.R.layout.simple_spinner_item);
         for (int i = 0; i < brandList.size(); i++) {
@@ -90,7 +90,7 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
         posmAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //------------------------------------------------
 
-        recyclerList = db.getPosmEntryData(store_cd,coverage_id);
+        recyclerList = db.getPosmEntryData(store_cd, coverage_id);
 
         if (recyclerList.size() > 0) {
             adapter = new ValueAdapter(getApplicationContext(), recyclerList);
@@ -198,7 +198,7 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
                         if (fab_add.getTag().toString().equalsIgnoreCase("edit")) {
                             AlertAndMessages.showToastMessage(context, "Please add the data first");
                         } else {
-                            long id = db.insertPosmEntryData(recyclerList, store_cd,coverage_id);
+                            long id = db.insertPosmEntryData(recyclerList, store_cd, coverage_id);
                             if (id > 0) {
                                 AlertAndMessages.showToastMessage(context, "Data has been saved");
                                 finish();
@@ -209,19 +209,21 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
                         }
                     } else if (flag_operation.equalsIgnoreCase("save")) {
                         if (fab_add.getTag().toString().equalsIgnoreCase("save")) {
-                            db.insertPosmEntryData(recyclerList, store_cd,coverage_id);
+                            db.insertPosmEntryData(recyclerList, store_cd, coverage_id);
                             AlertAndMessages.showToastMessage(context, "Data has been saved");
                             finish();
                         }
-                    } else if (flag_operation.equalsIgnoreCase("delete") && removedID > 0L) {
+                    }
+                    /*else if (flag_operation.equalsIgnoreCase("delete") && removedID > 0L) {
                         db.deletePosmEntryData(removedID);
                         AlertAndMessages.showToastMessage(context, "Data has been deleted");
                         removedID = 0L;
                         flag_operation = "save";
                         finish();
-                    }
+                    }*/
                 } else {
-                    if (flag_operation.equalsIgnoreCase("delete") && recyclerList.size() == 0 && removedID > 0L) {
+                    AlertAndMessages.showToastMessage(context, "please add the data first");
+                   /* if (flag_operation.equalsIgnoreCase("delete") && recyclerList.size() == 0 && removedID > 0L) {
                         db.deletePosmEntryData(removedID);
                         AlertAndMessages.showToastMessage(context, "Data has been deleted");
                         removedID = 0L;
@@ -229,7 +231,7 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
                         finish();
                     } else {
                         AlertAndMessages.showToastMessage(context, "please add the data first");
-                    }
+                    }*/
 
                 }
                 break;
@@ -245,13 +247,23 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
                 brand_cd = brandList.get(position).getBRAND_CD().get(0);
                 posmList.clear();
                 posmAdapter.clear();
-                posmList = db.getPosmMasterList(state_cd,storetype_cd,brand_cd);
+                posmList = db.getPosmMasterList(state_cd, storetype_cd, brand_cd);
                 //------------for POSM List---------------
                 for (int i = 0; i < posmList.size(); i++) {
                     posmAdapter.add(posmList.get(i).getPOSM().get(0));
                 }
                 sp_posm.setAdapter(posmAdapter);
+                posmAdapter.notifyDataSetChanged();
                 //------------------------------------------------
+                if(flag_operation.equalsIgnoreCase("edit"))
+                {
+                    for (int i = 0; i < posmList.size(); i++) {
+                        if (posmList.get(i).getPOSM_CD().get(0).equalsIgnoreCase(recyclerList.get(editPosition).getPosm_cd())) {
+                            sp_posm.setSelection(i);
+                            break;
+                        }
+                    }
+                }
                 break;
             case R.id.sp_posm:
                 posm_cd = posmList.get(position).getPOSM_CD().get(0);
@@ -311,10 +323,8 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
             isgood = false;
             AlertAndMessages.showToastMessage(context, "Please fill quantity");
         } else if (!(edt_quantity.getText().toString().equalsIgnoreCase(""))
-                && (Integer.parseInt(edt_quantity.getText().toString())>0))
-        {
-            if(image == "")
-            {
+                && (Integer.parseInt(edt_quantity.getText().toString()) > 0)) {
+            if (image == "") {
                 isgood = false;
                 AlertAndMessages.showToastMessage(context, "Please click image");
             }
@@ -369,12 +379,6 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
                                                             break;
                                                         }
                                                     }
-                                                    for (int i = 0; i < posmList.size(); i++) {
-                                                        if (posmList.get(i).getPOSM_CD().get(0).equalsIgnoreCase(recyclerList.get(position).getPosm_cd())) {
-                                                            sp_posm.setSelection(i);
-                                                            break;
-                                                        }
-                                                    }
 
                                                     if (!recyclerList.get(position).getQuantity().equalsIgnoreCase("")) {
                                                         edt_quantity.setText(recyclerList.get(position).getQuantity());
@@ -384,6 +388,14 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
                                                         btnimg_camera.setBackgroundResource(R.drawable.camera_green);
                                                         image = recyclerList.get(position).getImage();
                                                     }
+
+
+                                                  /*  for (int i = 0; i < posmList.size(); i++) {
+                                                        if (posmList.get(i).getPOSM_CD().get(0).equalsIgnoreCase(recyclerList.get(position).getPosm_cd())) {
+                                                            sp_posm.setSelection(i);
+                                                            break;
+                                                        }
+                                                    }*/
 
                                                     fab_add.setImageResource(R.drawable.editimage);
                                                     fab_add.setTag("edit");
@@ -398,15 +410,15 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
                                             Runnable deleteTask = new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    flag_operation = "delete";
+                                                    //flag_operation = "delete";
                                                     if (recyclerList.get(position).getId() != null) {
                                                         removedID = Long.parseLong(recyclerList.get(position).getId());
                                                     }
                                                     recyclerList.remove(position);
-                                                    adapter = new ValueAdapter(getApplicationContext(), recyclerList);
+                                                    recyclerView.removeViewAt(position);
                                                     adapter.notifyDataSetChanged();
-                                                    recyclerView.setLayoutManager(new LinearLayoutManager(activity));
-                                                    recyclerView.setAdapter(adapter);
+                                                  /*  recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+                                                    recyclerView.setAdapter(adapter);*/
                                                 }
                                             };
                                             AlertAndMessages.editorDeleteAlert(activity, "Are you sure to delete?", deleteTask);
@@ -452,6 +464,7 @@ public class PosmEntryActivity extends AppCompatActivity implements View.OnClick
         image = "";
         _pathforcheck = "";
         btnimg_camera.setBackgroundResource(R.drawable.camera_orange);
+        flag_operation = "save";
     }
 
 }

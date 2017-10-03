@@ -42,6 +42,7 @@ public class CommonString {
 
     //Url etc
     public static final String URL = "http://gsksubd.parinaam.in/GSKsubservice.asmx";
+    public static final String URL2 = "http://gsksubd.parinaam.in/GSKsubservice.asmx/";
     public static final String URL_Notice_Board = "http://gsksubd.parinaam.in/notice/notice.html";
     public static final String NAMESPACE = "http://tempuri.org/";
 
